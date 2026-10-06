@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Interactive Multiple Sequence Alignment (MSA) Dashboard powered by EMBL-EBI Clustal Omega." />
+  <title>Globin Family MSA &amp; Functional Site Dashboard - Clustal Omega MSA Dashboard</title>
+  <style>
+:root {
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #F1F5F9;
+  --text-main: #0F172A;
+  --text-muted: #475569;
+  --border-color: #CBD5E1;
+  --accent-color: #0284C7;
+  --accent-hover: #0369A1;
+  --highlight-ring: #F59E0B;
+  --viewport-bg: #0F172A;
+  --cell-size: 18px;
+  --cell-font: 12px;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0B1120;
+  --bg-secondary: #1E293B;
+  --bg-tertiary: #0F172A;
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --border-color: #334155;
+  --accent-color: #38BDF8;
+  --accent-hover: #0284C7;
+  --highlight-ring: #FBBF24;
+  --viewport-bg: #070B14;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dashboard-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.top-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 18px 22px;
+  margin-bottom: 18px;
+}
+
+.header-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.header-subtitle {
+  margin: 4px 0 0 0;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.icon-theme-btn {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-tertiary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.icon-theme-btn:hover {
+  background-color: var(--border-color);
+  border-color: var(--accent-color);
+}
+
+.icon-theme-btn svg {
+  width: 19px;
+  height: 19px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+[data-theme="light"] .theme-icon-sun {
+  display: none;
+}
+
+[data-theme="light"] .theme-icon-moon {
+  display: block;
+}
+
+[data-theme="dark"] .theme-icon-sun {
+  display: block;
+}
+
+[data-theme="dark"] .theme-icon-moon {
+  display: none;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.kpi-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.kpi-label {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.kpi-value {
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin-top: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.kpi-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.panel-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+
+.panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 700;
+}
+
+.panel-subtitle {
+  margin: 4px 0 0 0;
+  font-size: 0.81rem;
+  color: var(--text-muted);
+}
+
+.toolbar-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.control-label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  gap: 4px;
+}
+
+.control-input {
+  background-color: var(--bg-tertiary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.81rem;
+}
+
+.control-input-sm {
+  width: 88px;
+}
+
+.control-slider {
+  width: 118px;
+  accent-color: var(--accent-color);
+}
+
+.action-btn {
+  background-color: var(--accent-color);
+  color: #FFFFFF;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 7px 13px;
+  font-size: 0.81rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.action-btn:hover {
+  background-color: var(--accent-hover);
+}
+
+.action-btn-secondary {
+  background-color: var(--bg-tertiary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+.action-btn-secondary:hover {
+  background-color: var(--border-color);
+}
+
+.info-banner {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--accent-color);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  font-size: 0.81rem;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Input vs Processed Data Table & Composition Bars */
+.input-profile-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.81rem;
+}
+
+.input-profile-table th,
+.input-profile-table td {
+  border-bottom: 1px solid var(--border-color);
+  padding: 9px 10px;
+  text-align: left;
+}
+
+.input-profile-table th {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background-color: var(--bg-tertiary);
+}
+
+.input-profile-row {
+  cursor: pointer;
+}
+
+.input-profile-row:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.input-profile-row.active-seq-row {
+  background-color: rgba(2, 132, 199, 0.16);
+}
+
+.comp-bar-stack {
+  display: flex;
+  height: 12px;
+  width: 180px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.comp-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.comp-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* 3D Homology Network & Conservation Landscape */
+.network-3d-layout {
+  display: grid;
+  grid-template-columns: 1fr 310px;
+  gap: 16px;
+}
+
+@media (max-width: 980px) {
+  .network-3d-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.viewport-3d-wrapper {
+  position: relative;
+  background-color: var(--viewport-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  height: 390px;
+}
+
+#homology-3d-viewport {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+
+#homology-3d-viewport:active {
+  cursor: grabbing;
+}
+
+.viewport-3d-overlay {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  font-size: 0.74rem;
+  color: #CBD5E1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.network-side-panel {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 0.81rem;
+}
+
+.node-stat-box {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+/* Alignment Viewer */
+.msa-viewport-wrapper {
+  display: flex;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: var(--bg-tertiary);
+}
+
+.msa-fixed-headers {
+  width: 240px;
+  min-width: 240px;
+  border-right: 2px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  z-index: 2;
+}
+
+.msa-header-cell {
+  padding: 0 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.msa-ruler-label {
+  height: 26px;
+}
+
+.msa-conservation-label {
+  height: 46px;
+}
+
+.msa-consensus-label {
+  height: 28px;
+  border-top: 1px solid var(--border-color);
+  border-bottom: none;
+}
+
+.msa-seq-label-row {
+  height: var(--cell-size);
+  padding: 0 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.msa-seq-label-row.active-seq-row {
+  background-color: rgba(2, 132, 199, 0.18);
+  font-weight: 700;
+}
+
+.msa-scroll-viewport {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+}
+
+.msa-ruler-track {
+  display: flex;
+  height: 26px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+}
+
+.msa-ruler-tick {
+  width: var(--cell-size);
+  min-width: var(--cell-size);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.msa-conservation-track {
+  display: flex;
+  height: 46px;
+  align-items: flex-end;
+  padding-top: 4px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+}
+
+.msa-cons-bar-wrapper {
+  width: var(--cell-size);
+  min-width: var(--cell-size);
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.msa-cons-bar {
+  width: calc(var(--cell-size) - 3px);
+  border-radius: 2px 2px 0 0;
+}
+
+.msa-sequence-tracks {
+  display: flex;
+  flex-direction: column;
+}
+
+.msa-seq-row {
+  display: flex;
+  height: var(--cell-size);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.msa-seq-row.active-seq-row {
+  outline: 2px solid var(--accent-color);
+  z-index: 1;
+}
+
+.msa-cell {
+  width: var(--cell-size);
+  min-width: var(--cell-size);
+  height: var(--cell-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--cell-font);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.msa-cell.highlighted-col {
+  box-shadow: inset 0 0 0 2px var(--highlight-ring);
+}
+
+.msa-cell.motif-match-cell {
+  box-shadow: inset 0 0 0 2px #DC2626;
+  font-weight: 800;
+}
+
+.msa-consensus-track {
+  display: flex;
+  height: 28px;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+}
+
+.inspector-drawer {
+  margin-top: 14px;
+  padding: 14px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.inspector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.inspector-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.dual-grid-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+  gap: 18px;
+}
+
+.pim-summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.metric-pill {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.pim-heatmap-container {
+  overflow-x: auto;
+}
+
+.pim-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.pim-table th,
+.pim-table td {
+  border: 1px solid var(--border-color);
+  padding: 8px;
+  text-align: center;
+}
+
+.pim-table th {
+  background-color: var(--bg-tertiary);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.pim-cell {
+  color: #FFFFFF;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.pim-cell:hover {
+  outline: 2px solid var(--highlight-ring);
+}
+
+.pim-tooltip {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.phylotree-container {
+  overflow-x: auto;
+  padding: 8px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+}
+
+.newick-raw-details {
+  margin-top: 10px;
+  font-size: 0.8rem;
+}
+
+.newick-raw-pre {
+  padding: 10px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.feature-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.feature-card {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 14px;
+  cursor: pointer;
+}
+
+.feature-card:hover {
+  border-color: var(--accent-color);
+}
+
+.dashboard-footer {
+  margin-top: 24px;
+  padding: 18px 22px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.81rem;
+}
+
+.citation-list {
+  margin: 8px 0 14px 0;
+  padding-left: 20px;
+}
+
+.citation-list li {
+  margin-bottom: 6px;
+}
+
+.disclaimer-box {
+  padding: 12px;
+  background-color: var(--bg-tertiary);
+  border-left: 4px solid var(--accent-color);
+  color: var(--text-muted);
+  font-size: 0.79rem;
+}
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <header class="top-header">
+      <div>
+        <h1 class="header-title">Globin Family MSA &amp; Functional Site Dashboard</h1>
+        <p class="header-subtitle">EMBL-EBI Clustal Omega Multiple Sequence Alignment &amp; Evolutionary Conservation Workspace | Generated: 2026-10-05T17:01:32Z</p>
+      </div>
+      <div class="header-actions">
+        <button id="export-fasta-btn" type="button" class="action-btn">Download Aligned FASTA</button>
+        <button id="export-svg-btn" type="button" class="action-btn action-btn-secondary">Export Alignment SVG</button>
+        <button id="toggle-theme-btn" type="button" class="icon-theme-btn" aria-label="Toggle Light and Dark Theme" title="Toggle Light / Dark Theme">
+          <svg class="theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="kpi-grid" aria-label="Alignment Summary Metrics">
+      <div class="kpi-card">
+        <div class="kpi-label">Aligned Sequences</div>
+        <div class="kpi-value">5</div>
+        <div class="kpi-sub">Total alignment length: 165 columns</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Mean Global Identity</div>
+        <div class="kpi-value">16.61%</div>
+        <div class="kpi-sub">Coverage: 19.06% | Overlap: 18.41%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Mean Conservation Score</div>
+        <div class="kpi-value">0.5438</div>
+        <div class="kpi-sub">Normalized Shannon entropy index in [0, 1]</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Invariant Columns</div>
+        <div class="kpi-value">6 / 165</div>
+        <div class="kpi-sub">Conservation Index: 3.64% | Mean Gap Rate: 11.0%</div>
+      </div>
+    </section>
+
+    <section id="input-data-profile-section" class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Input Sequences &amp; Residue Composition</h2>
+          <p class="panel-subtitle">Comparison of raw input sequence lengths, gap insertions during alignment, GRAVY hydropathy, and biochemical class distribution</p>
+        </div>
+        <div class="comp-legend">
+          <span><i class="comp-dot" style="background:#1F77B4;"></i>Hydrophobic</span>
+          <span><i class="comp-dot" style="background:#2CA02C;"></i>Polar</span>
+          <span><i class="comp-dot" style="background:#D62728;"></i>Basic</span>
+          <span><i class="comp-dot" style="background:#E377C2;"></i>Acidic</span>
+          <span><i class="comp-dot" style="background:#FF7F0E;"></i>Special (C/G/P)</span>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="input-profile-table">
+          <thead>
+            <tr>
+              <th>Sequence Identifier</th>
+              <th>Input Length</th>
+              <th>Aligned Length &amp; Gaps</th>
+              <th>GRAVY Index</th>
+              <th>Biochemical Profile</th>
+              <th>Class Breakdown</th>
+            </tr>
+          </thead>
+          <tbody id="input-profile-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="homology-3d-section" class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">3D Sequence Homology Network</h2>
+          <p class="panel-subtitle">Interactive 3D spatial clustering of protein sequences and conservation landscape; drag to rotate, scroll to zoom, or click a node to highlight</p>
+        </div>
+        <div class="toolbar-controls">
+          <label class="control-label" for="view-3d-mode-select">3D View Mode
+            <select id="view-3d-mode-select" class="control-input">
+              <option value="network" selected>Homology Network (Nodes &amp; Edges)</option>
+              <option value="landscape">3D Conservation Landscape</option>
+            </select>
+          </label>
+          <label class="control-label" for="edge-threshold-slider">Min Edge Identity: <span id="edge-threshold-val">15%</span>
+            <input id="edge-threshold-slider" type="range" min="10" max="60" step="5" value="15" class="control-slider" />
+          </label>
+          <button id="toggle-autorotate-btn" type="button" class="action-btn action-btn-secondary">Pause Rotation</button>
+          <button id="reset-3d-view-btn" type="button" class="action-btn action-btn-secondary">Reset View</button>
+        </div>
+      </div>
+      <div class="network-3d-layout">
+        <div class="viewport-3d-wrapper">
+          <svg id="homology-3d-viewport" viewBox="0 0 680 390" preserveAspectRatio="xMidYMid meet">
+<ellipse cx="340.0" cy="213.0" rx="235" ry="78" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-dasharray="4 4" stroke-width="1" />
+<ellipse cx="340.0" cy="213.0" rx="145" ry="48" fill="none" stroke="rgba(148, 163, 184, 0.12)" stroke-dasharray="3 3" stroke-width="1" />
+<line x1="443.6" y1="200.5" x2="378.9" y2="115.3" stroke="rgba(16, 185, 129, 0.46)" stroke-width="2.1" />
+<text x="415.2" y="154.9" fill="rgba(203, 213, 225, 0.82)" font-size="10" font-family="monospace">45.8%</text>
+<line x1="443.6" y1="200.5" x2="324.5" y2="224.7" stroke="rgba(56, 189, 248, 0.27)" stroke-width="1.2" />
+<text x="388.1" y="209.6" fill="rgba(203, 213, 225, 0.82)" font-size="10" font-family="monospace">27.5%</text>
+<line x1="443.6" y1="200.5" x2="315.2" y2="311.6" stroke="rgba(56, 189, 248, 0.22)" stroke-width="1.2" />
+<text x="383.4" y="253.0" fill="rgba(203, 213, 225, 0.82)" font-size="10" font-family="monospace">18.3%</text>
+<line x1="378.9" y1="115.3" x2="324.5" y2="224.7" stroke="rgba(56, 189, 248, 0.25)" stroke-width="1.2" />
+<text x="355.7" y="167.0" fill="rgba(203, 213, 225, 0.82)" font-size="10" font-family="monospace">25.2%</text>
+<circle cx="324.5" cy="224.7" r="10" fill="#F59E0B" stroke="#FFFFFF" stroke-width="1.5" />
+<text x="340.5" y="228.7" fill="#F8FAFC" font-size="12" font-family="monospace">MYG_HUMAN (154aa)</text>
+<circle cx="378.9" cy="115.3" r="12" fill="#10B981" stroke="#FFFFFF" stroke-width="1.5" />
+<text x="396.9" y="119.3" fill="#F8FAFC" font-size="12" font-family="monospace">HBB_HUMAN (147aa)</text>
+<circle cx="443.6" cy="200.5" r="14" fill="#38BDF8" stroke="#FFFFFF" stroke-width="1.5" />
+<text x="463.6" y="204.5" fill="#F8FAFC" font-size="12" font-family="monospace">HBA_HUMAN (142aa)</text>
+<circle cx="230.0" cy="133.3" r="15" fill="#EC4899" stroke="#FFFFFF" stroke-width="1.5" />
+<text x="251.0" y="137.3" fill="#F8FAFC" font-size="12" font-family="monospace">LGB1_SOYBN (144aa)</text>
+<circle cx="315.2" cy="311.6" r="15" fill="#A855F7" stroke="#FFFFFF" stroke-width="1.5" />
+<text x="336.2" y="315.6" fill="#F8FAFC" font-size="12" font-family="monospace">NGB_HUMAN (147aa)</text>
+          </svg>
+          <div class="viewport-3d-overlay">
+            <span>Drag: Orbit 3D | Scroll: Zoom | Click Node: Inspect Sequence</span>
+            <span>ClustalX Color Schema</span>
+          </div>
+        </div>
+        <div class="network-side-panel">
+          <div style="font-weight:700;font-size:0.9rem;">Sequence Node Inspector</div>
+          <div id="selected-node-details" class="node-stat-box">
+            <div class="text-muted">Click a node in the 3D view, sequence row, or tree leaf to inspect its pairwise homology connections.</div>
+          </div>
+          <div class="node-stat-box">
+            <div style="font-weight:600;margin-bottom:4px;">Spatial Clustering Guide</div>
+            <div class="text-muted" style="font-size:0.76rem;">
+              Sequences with higher pairwise identity cluster closer in 3D space. Edge thickness and color intensity reflect percent identity (emerald &ge; 35%, sky blue &lt; 35%).
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="alignment-viewer-section" class="panel-card">
+  <div class="panel-header">
+    <div>
+      <h2 class="panel-title">Interactive Multi-Track Sequence Alignment Viewer</h2>
+      <p class="panel-subtitle">Synchronized dual-axis alignment matrix with per-column Shannon entropy conservation bars and dynamic consensus sequence</p>
+    </div>
+    <div class="toolbar-controls">
+      <label class="control-label" for="color-scheme-select">Color Scheme
+        <select id="color-scheme-select" class="control-input">
+          <option value="ClustalX" selected>ClustalX (Biochemical)</option>
+          <option value="Zappo">Zappo (Physicochemical)</option>
+          <option value="Taylor">Taylor (Rainbow)</option>
+          <option value="Hydrophobicity">Hydrophobicity (Kyte-Doolittle)</option>
+          <option value="Monochromatic">Monochromatic</option>
+        </select>
+      </label>
+      <label class="control-label" for="consensus-threshold-slider">Consensus Threshold: <span id="consensus-threshold-val">80%</span>
+        <input id="consensus-threshold-slider" type="range" min="50" max="100" step="5" value="80" class="control-slider" />
+      </label>
+      <label class="control-label" for="font-size-slider">Cell Size: <span id="font-size-val">18px</span>
+        <input id="font-size-slider" type="range" min="14" max="26" step="2" value="18" class="control-slider" />
+      </label>
+      <label class="control-label" for="jump-position-input">Jump to Position
+        <input id="jump-position-input" type="number" min="1" placeholder="Col #" class="control-input control-input-sm" />
+      </label>
+      <label class="control-label" for="motif-search-input">Find Motif (Regex)
+        <input id="motif-search-input" type="text" placeholder="e.g. H..H or G..G.G" class="control-input" />
+      </label>
+      <button id="clear-highlights-btn" type="button" class="action-btn action-btn-secondary">Clear Filter</button>
+    </div>
+  </div>
+
+  <div id="motif-match-banner" class="info-banner hidden"></div>
+
+  <div class="msa-viewport-wrapper">
+    <div id="msa-fixed-headers" class="msa-fixed-headers">
+      <div class="msa-header-cell msa-ruler-label">Position Ruler</div>
+      <div class="msa-header-cell msa-conservation-label">Conservation Score</div>
+      <div id="msa-sequence-labels" class="msa-sequence-labels"></div>
+      <div class="msa-header-cell msa-consensus-label">Consensus Sequence</div>
+    </div>
+    <div id="msa-scroll-viewport" class="msa-scroll-viewport">
+      <div id="msa-ruler-track" class="msa-ruler-track"></div>
+      <div id="msa-conservation-track" class="msa-conservation-track"></div>
+      <div id="msa-sequence-tracks" class="msa-sequence-tracks"></div>
+      <div id="msa-consensus-track" class="msa-consensus-track"></div>
+    </div>
+  </div>
+
+  <div id="column-inspector-drawer" class="inspector-drawer">
+    <div class="inspector-header">
+      <h3 id="inspector-title" class="inspector-title">Column Inspector (Click any alignment column to inspect residue breakdown)</h3>
+      <span id="inspector-badge" class="status-badge">Ready</span>
+    </div>
+    <div id="inspector-body" class="inspector-body">
+      <p class="text-muted">Select a column in the alignment viewer or conservation bar chart above to inspect exact Shannon entropy (bits), normalized conservation index, gap frequency, and amino acid distribution.</p>
+    </div>
+  </div>
+</section>
+
+    <div class="dual-grid-section">
+  <section id="pim-heatmap-section" class="panel-card">
+    <div class="panel-header">
+      <div>
+        <h2 class="panel-title">All-vs-All Pairwise Percent Identity Matrix (PIM)</h2>
+        <p class="panel-subtitle">Interactive homology matrix across four mathematical denominator definitions</p>
+      </div>
+      <div class="toolbar-controls">
+        <label class="control-label" for="pim-metric-select">Identity Metric
+          <select id="pim-metric-select" class="control-input">
+            <option value="global" selected>Global Identity (Matches / Alignment Length)</option>
+            <option value="coverage">Sequence Coverage Identity (Matches / Min Length)</option>
+            <option value="overlap">Overlap Identity (Excludes Terminal Gaps)</option>
+            <option value="external">Clustal Omega PIM Endpoint</option>
+          </select>
+        </label>
+        <button id="export-pim-csv-btn" type="button" class="action-btn action-btn-secondary">Export CSV</button>
+        <button id="export-pim-json-btn" type="button" class="action-btn action-btn-secondary">Export JSON</button>
+      </div>
+    </div>
+
+    <div class="pim-summary-strip">
+      <div class="metric-pill">
+        <span class="metric-pill-label">Multisequence Conservation Index:</span>
+        <strong id="pim-conservation-index-val">--</strong>
+      </div>
+      <div class="metric-pill">
+        <span class="metric-pill-label">Active Metric Mean Pairwise Identity:</span>
+        <strong id="pim-active-mean-val">--</strong>
+      </div>
+    </div>
+
+    <div id="pim-heatmap-container" class="pim-heatmap-container"></div>
+    <div id="pim-tooltip" class="pim-tooltip hidden"></div>
+  </section>
+
+  <section id="phylotree-section" class="panel-card">
+    <div class="panel-header">
+      <div>
+        <h2 class="panel-title">Phylogenetic Guide Tree Cladogram</h2>
+        <p class="panel-subtitle">Hierarchical clustering tree (Newick format) with evolutionary branch lengths; hover or click leaf nodes to highlight sequence tracks</p>
+      </div>
+    </div>
+    <div id="phylotree-container" class="phylotree-container">
+      <svg id="phylotree-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 264" width="100%" height="264" class="phylotree-svg">
+<line x1="28.0" y1="137.25" x2="28.0" y2="85.5" stroke="#64748B" stroke-width="2" />
+<line x1="28.0" y1="85.5" x2="91.85" y2="85.5" stroke="#64748B" stroke-width="2" />
+<text x="59.92" y="80.5" text-anchor="middle" font-size="10" fill="#64748B" font-family="monospace">0.084</text>
+<line x1="91.85" y1="85.5" x2="91.85" y2="51.0" stroke="#64748B" stroke-width="2" />
+<line x1="91.85" y1="51.0" x2="179.31" y2="51.0" stroke="#64748B" stroke-width="2" />
+<text x="135.58" y="46.0" text-anchor="middle" font-size="10" fill="#64748B" font-family="monospace">0.115</text>
+<line x1="179.31" y1="51.0" x2="179.31" y2="28.0" stroke="#64748B" stroke-width="2" />
+<line x1="179.31" y1="28.0" x2="392.94" y2="28.0" stroke="#64748B" stroke-width="2" />
+<text x="286.12" y="23.0" text-anchor="middle" font-size="10" fill="#64748B" font-family="monospace">0.281</text>
+<g class="tree-leaf-node" data-seq-id="sp|P69905|HBA_HUMAN"  style="cursor:pointer;"><circle cx="392.94" cy="28.0" r="5" fill="#0284C7" stroke="#FFFFFF" stroke-width="1.5" /><text x="402.94" y="32.0" font-size="12" font-weight="600" font-family="monospace" fill="currentColor">sp|P69905|HBA_HUMAN</text></g>
+<line x1="179.31" y1="51.0" x2="179.31" y2="74.0" stroke="#64748B" stroke-width="2" />
+<line x1="179.31" y1="74.0" x2="383.22" y2="74.0" stroke="#64748B" stroke-width="2" />
+<text x="281.26" y="69.0" text-anchor="middle" font-size="10" fill="#64748B" font-family="monospace">0.269</text>
+<g class="tree-leaf-node" data-seq-id="sp|P68871|HBB_HUMAN"  style="cursor:pointer;"><circle cx="383.22" cy="74.0" r="5" fill="#0284C7" stroke="#FFFFFF" stroke-width="1.5" /><text x="393.22" y="78.0" font-size="12" font-weight="600" font-family="monospace" fill="currentColor">sp|P68871|HBB_HUMAN</text></g>
+<circle cx="179.31" cy="51.0" r="3.5" fill="#475569" />
+<line x1="91.85" y1="85.5" x2="91.85" y2="120.0" stroke="#64748B" stroke-width="2" />
+<line x1="91.85" y1="120.0" x2="371.15" y2="120.0" stroke="#64748B" stroke-width="2" />
+<text x="231.5" y="115.0" text-anchor="middle" font-size="10" fill="#64748B" font-family="monospace">0.368</text>
+<g class="tree-leaf-node" data-seq-id="sp|P02144|MYG_HUMAN"  style="cursor:pointer;"><circle cx="371.15" cy="120.0" r="5" fill="#0284C7" stroke="#FFFFFF" stroke-width="1.5" /><text x="381.15" y="124.0" font-size="12" font-weight="600" font-family="monospace" fill="currentColor">sp|P02144|MYG_HUMAN</text></g>
+<circle cx="91.85" cy="85.5" r="3.5" fill="#475569" />
+<line x1="28.0" y1="137.25" x2="28.0" y2="189.0" stroke="#64748B" stroke-width="2" />
+<line x1="28.0" y1="189.0" x2="74.99" y2="189.0" stroke="#64748B" stroke-width="2" />
+<text x="51.49" y="184.0" text-anchor="middle" font-size="10" fill="#64748B" font-family="monospace">0.062</text>
+<line x1="74.99" y1="189.0" x2="74.99" y2="166.0" stroke="#64748B" stroke-width="2" />
+<line x1="74.99" y1="166.0" x2="388.16" y2="166.0" stroke="#64748B" stroke-width="2" />
+<text x="231.58" y="161.0" text-anchor="middle" font-size="10" fill="#64748B" font-family="monospace">0.412</text>
+<g class="tree-leaf-node" data-seq-id="sp|P02238|LGB1_SOYBN"  style="cursor:pointer;"><circle cx="388.16" cy="166.0" r="5" fill="#0284C7" stroke="#FFFFFF" stroke-width="1.5" /><text x="398.16" y="170.0" font-size="12" font-weight="600" font-family="monospace" fill="currentColor">sp|P02238|LGB1_SOYBN</text></g>
+<line x1="74.99" y1="189.0" x2="74.99" y2="212.0" stroke="#64748B" stroke-width="2" />
+<line x1="74.99" y1="212.0" x2="400.0" y2="212.0" stroke="#64748B" stroke-width="2" />
+<text x="237.5" y="207.0" text-anchor="middle" font-size="10" fill="#64748B" font-family="monospace">0.428</text>
+<g class="tree-leaf-node" data-seq-id="sp|Q9NPG2|NGB_HUMAN"  style="cursor:pointer;"><circle cx="400.0" cy="212.0" r="5" fill="#0284C7" stroke="#FFFFFF" stroke-width="1.5" /><text x="410.0" y="216.0" font-size="12" font-weight="600" font-family="monospace" fill="currentColor">sp|Q9NPG2|NGB_HUMAN</text></g>
+<circle cx="74.99" cy="189.0" r="3.5" fill="#475569" />
+<circle cx="28.0" cy="137.25" r="3.5" fill="#475569" />
+</svg>
+    </div>
+    <details class="newick-raw-details">
+      <summary>View Raw Newick Tree String</summary>
+      <pre id="newick-raw-pre" class="newick-raw-pre"></pre>
+    </details>
+  </section>
+</div>
+
+    <section id="feature-mapper-section" class="panel-card">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Functional Feature &amp; Motif Coordinate Mapper</h2>
+          <p class="panel-subtitle">Project 1-based unaligned reference sequence positions onto aligned MSA columns to evaluate active-site and motif invariance</p>
+        </div>
+        <div class="toolbar-controls">
+          <label class="control-label" for="projector-ref-select">Reference Sequence
+            <select id="projector-ref-select" class="control-input">
+              <option value="sp|P69905|HBA_HUMAN">sp|P69905|HBA_HUMAN (142 aa)</option>
+<option value="sp|P68871|HBB_HUMAN">sp|P68871|HBB_HUMAN (147 aa)</option>
+<option value="sp|P02144|MYG_HUMAN">sp|P02144|MYG_HUMAN (154 aa)</option>
+<option value="sp|P02238|LGB1_SOYBN">sp|P02238|LGB1_SOYBN (144 aa)</option>
+<option value="sp|Q9NPG2|NGB_HUMAN">sp|Q9NPG2|NGB_HUMAN (147 aa)</option>
+            </select>
+          </label>
+          <label class="control-label" for="projector-name-input">Feature Label
+            <input id="projector-name-input" type="text" placeholder="e.g. Distal His (E7)" class="control-input" />
+          </label>
+          <label class="control-label" for="projector-pos-input">1-Based Unaligned Position
+            <input id="projector-pos-input" type="number" min="1" value="59" class="control-input control-input-sm" />
+          </label>
+          <button id="project-coord-btn" type="button" class="action-btn">Project Coordinate</button>
+        </div>
+      </div>
+      <div id="feature-cards-grid" class="feature-cards-grid"></div>
+    </section>
+
+    <footer class="dashboard-footer">
+      <h3 style="margin-top:0;font-size:0.95rem;font-weight:700;">Mandatory Academic Attribution &amp; Literature Citations</h3>
+      <p style="margin:4px 0;color:var(--text-muted);">Multiple sequence alignment and phylogenetic guide tree generation performed using <strong>EMBL-EBI Clustal Omega</strong>:</p>
+      <ul class="citation-list">
+        <li><strong>Clustal Omega:</strong> Sievers, F. et al. <em>Fast, scalable generation of high-quality protein multiple sequence alignments using Clustal Omega.</em> Molecular Systems Biology 7, 539 (2011). <a href="https://doi.org/10.1038/msb.2011.75" target="_blank" rel="noopener noreferrer">doi:10.1038/msb.2011.75</a></li>
+<li><strong>EBI Job Dispatcher 2024:</strong> Madeira, F. et al. <em>The EMBL-EBI Job Dispatcher sequence analysis tools framework in 2024.</em> Nucleic Acids Research 52 (W1), W521-W525 (2024). <a href="https://doi.org/10.1093/nar/gkae241" target="_blank" rel="noopener noreferrer">doi:10.1093/nar/gkae241</a></li>
+<li><strong>EBI Analysis Framework:</strong> Goujon, M. et al. <em>A new bioinformatics analysis tools framework at EMBL-EBI.</em> Nucleic Acids Research 38 (suppl_2), W695-W699 (2010). <a href="https://doi.org/10.1093/nar/gkq313" target="_blank" rel="noopener noreferrer">doi:10.1093/nar/gkq313</a></li>
+      </ul>
+      <div class="disclaimer-box">
+        AS-IS Scientific Disclaimer: Multiple sequence alignments, conservation scores, and phylogenetic guide trees generated by this pipeline are heuristic computational predictions produced via EMBL-EBI Clustal Omega. They must not be treated as definitive structural, clinical, or evolutionary evidence without independent biochemical and experimental validation.
+      </div>
+    </footer>
+  </div>
+
+  <script id="msa-data" type="application/json">{"title":"Globin Family MSA & Functional Site Dashboard","generated_at":"2026-10-05T17:01:32Z","summary":{"num_sequences":5,"alignment_length":165,"invariant_columns":6,"conservation_index":3.64,"conservation_index_ratio":0.0364,"mean_conservation_score":0.5438,"mean_gap_rate":0.1103,"mean_global_identity":16.61,"mean_coverage_identity":19.06,"mean_overlap_identity":18.41,"consensus_sequence":"M++l+p.+.++V+++WgkV.a+++e+G.e+l.Rlf+.+P.t..+F..f+.l.+++++..s..+k.Hg+KV+.a+..++.+++.+.+++..L...H+.k.++....+.++...l+++l+.++p.+f...+.a+++k++a.v..+++.ky+++++++----------"},"input_profiles":[{"id":"sp|P69905|HBA_HUMAN","short_name":"HBA_HUMAN","description":"sp|P69905|HBA_HUMAN Hemoglobin subunit alpha OS=Homo sapiens OX=9606 GN=HBA1 PE=1 SV=2","unaligned_length":142,"aligned_length":165,"inserted_gaps":23,"gravy_hydropathy":0.048,"composition_pct":{"hydrophobic":46.5,"polar":17.6,"acidic":8.5,"basic":16.9,"special":10.6}},{"id":"sp|P68871|HBB_HUMAN","short_name":"HBB_HUMAN","description":"sp|P68871|HBB_HUMAN Hemoglobin subunit beta OS=Homo sapiens OX=9606 GN=HBB PE=1 SV=2","unaligned_length":147,"aligned_length":165,"inserted_gaps":18,"gravy_hydropathy":0.014,"composition_pct":{"hydrophobic":44.9,"polar":14.3,"acidic":10.2,"basic":15.6,"special":15.0}},{"id":"sp|P02144|MYG_HUMAN","short_name":"MYG_HUMAN","description":"sp|P02144|MYG_HUMAN Myoglobin OS=Homo sapiens OX=9606 GN=MB PE=1 SV=2","unaligned_length":154,"aligned_length":165,"inserted_gaps":11,"gravy_hydropathy":-0.476,"composition_pct":{"hydrophobic":38.3,"polar":13.6,"acidic":14.3,"basic":20.1,"special":13.6}},{"id":"sp|P02238|LGB1_SOYBN","short_name":"LGB1_SOYBN","description":"sp|P02238|LGB1_SOYBN Leghemoglobin-A OS=Glycine max OX=3847 GN=LBA PE=1 SV=2","unaligned_length":144,"aligned_length":165,"inserted_gaps":21,"gravy_hydropathy":0.024,"composition_pct":{"hydrophobic":49.3,"polar":17.4,"acidic":11.8,"basic":13.2,"special":8.3}},{"id":"sp|Q9NPG2|NGB_HUMAN","short_name":"NGB_HUMAN","description":"sp|Q9NPG2|NGB_HUMAN Neuroglobin OS=Homo sapiens OX=9606 GN=NGB PE=1 SV=1","unaligned_length":147,"aligned_length":165,"inserted_gaps":18,"gravy_hydropathy":-0.076,"composition_pct":{"hydrophobic":43.5,"polar":18.4,"acidic":12.2,"basic":12.2,"special":13.6}}],"sequences":[{"id":"sp|P69905|HBA_HUMAN","description":"sp|P69905|HBA_HUMAN Hemoglobin subunit alpha OS=Homo sapiens OX=9606 GN=HBA1 PE=1 SV=2","aligned_sequence":"MV-LSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHF-DLS-----HGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR----------------","unaligned_length":142,"aligned_length":165,"gap_count":23},{"id":"sp|P68871|HBB_HUMAN","description":"sp|P68871|HBB_HUMAN Hemoglobin subunit beta OS=Homo sapiens OX=9606 GN=HBB PE=1 SV=2","aligned_sequence":"MVHLTPEEKSAVTALWGKV--NVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDPENFRLLGNVLVCVLAHHFGKEFTPPVQAAYQKVVAGVANALAHKYH----------------","unaligned_length":147,"aligned_length":165,"gap_count":18},{"id":"sp|P02144|MYG_HUMAN","description":"sp|P02144|MYG_HUMAN Myoglobin OS=Homo sapiens OX=9606 GN=MB PE=1 SV=2","aligned_sequence":"M-GLSDGEWQLVLNVWGKVEADIPGHGQEVLIRLFKGHPETLEKFDKFKHLKSEDEMKASEDLKKHGATVLTALGGILKKKGHHEAEIKPLAQSHATKHKIPVKYLEFISECIIQVLQSKHPGDFGADAQGAMNKALELFRKDMASNYKELGFQG----------","unaligned_length":154,"aligned_length":165,"gap_count":11},{"id":"sp|P02238|LGB1_SOYBN","description":"sp|P02238|LGB1_SOYBN Leghemoglobin-A OS=Glycine max OX=3847 GN=LBA PE=1 SV=2","aligned_sequence":"MGAFTEKQEALVSSSWEAFKANIPQYSVVFYTSILEKAPAAKDLFSFL-ANGVD---PTNPKLTGHAEKLFALVRDSAGQLKASGTVVADAALGHVHAQKAVTDPQFVVVKEALLKTIKAAVGDKWSDELSRAWEVAYDELAAAIKKA-----------------","unaligned_length":144,"aligned_length":165,"gap_count":21},{"id":"sp|Q9NPG2|NGB_HUMAN","description":"sp|Q9NPG2|NGB_HUMAN Neuroglobin OS=Homo sapiens OX=9606 GN=NGB PE=1 SV=1","aligned_sequence":"MERPEPELIRQS---WRAVSRSPLEHGTVLFARLFALEPDLLPLFQYNCRQFSSPEDCLSSPEFLHIRKVMLVIDAAVTNVEDLSSLEEYLGRKHRAVGVKLSSFSTVGESLLYMLEKCLGPAFTPATRAAWSQLYGAVVQAMSRGWDGE---------------","unaligned_length":147,"aligned_length":165,"gap_count":18}],"columns":[[0,1,0.0,1.0,0.0,"M","M",1.0,1,{"M":5}],[1,2,1.5,0.5223,0.2,"+","V",0.4,0,{"E":1,"G":1,"V":2}],[2,3,2.0,0.4298,0.2,"+","A",0.2,0,{"A":1,"G":1,"H":1,"R":1}],[3,4,1.371,0.6828,0.0,"l","L",0.6,0,{"F":1,"L":3,"P":1}],[4,5,1.5219,0.6479,0.0,"+","S",0.4,0,{"E":1,"S":2,"T":2}],[5,6,1.371,0.6828,0.0,"p","P",0.6,0,{"D":1,"E":1,"P":3}],[6,7,1.9219,0.5553,0.0,".","E",0.4,0,{"A":1,"E":2,"G":1,"K":1}],[7,8,1.9219,0.5553,0.0,"+","E",0.4,0,{"D":1,"E":2,"L":1,"Q":1}],[8,9,1.9219,0.5553,0.0,".","K",0.4,0,{"E":1,"I":1,"K":2,"W":1}],[9,10,2.3219,0.4628,0.0,"+","A",0.2,0,{"A":1,"Q":1,"R":1,"S":1,"T":1}],[10,11,1.9219,0.5553,0.0,"+","L",0.4,0,{"A":1,"L":2,"N":1,"Q":1}],[11,12,0.7219,0.833,0.0,"V","V",0.8,0,{"S":1,"V":4}],[12,13,2.0,0.4298,0.2,"+","K",0.2,0,{"K":1,"L":1,"S":1,"T":1}],[13,14,1.5,0.5223,0.2,"+","A",0.4,0,{"A":2,"N":1,"S":1}],[14,15,2.0,0.4298,0.2,"+","A",0.2,0,{"A":1,"L":1,"S":1,"V":1}],[15,16,0.0,1.0,0.0,"W","W",1.0,1,{"W":5}],[16,17,1.371,0.6828,0.0,"g","G",0.6,0,{"E":1,"G":3,"R":1}],[17,18,0.971,0.7753,0.0,"k","K",0.6,0,{"A":2,"K":3}],[18,19,0.7219,0.833,0.0,"V","V",0.8,0,{"F":1,"V":4}],[19,20,2.0,0.4298,0.2,".","E",0.2,0,{"E":1,"G":1,"K":1,"S":1}],[20,21,0.8113,0.6498,0.2,"a","A",0.6,0,{"A":3,"R":1}],[21,22,1.9219,0.5553,0.0,"+","N",0.4,0,{"D":1,"H":1,"N":2,"S":1}],[22,23,1.9219,0.5553,0.0,"+","I",0.4,0,{"A":1,"I":2,"P":1,"V":1}],[23,24,1.9219,0.5553,0.0,"+","P",0.4,0,{"D":1,"G":1,"L":1,"P":2}],[24,25,1.371,0.6828,0.0,"e","E",0.6,0,{"E":3,"G":1,"Q":1}],[25,26,1.5219,0.6479,0.0,"+","H",0.4,0,{"H":2,"V":1,"Y":2}],[26,27,0.7219,0.833,0.0,"G","G",0.8,0,{"G":4,"S":1}],[27,28,2.3219,0.4628,0.0,".","A",0.2,0,{"A":1,"G":1,"Q":1,"T":1,"V":1}],[28,29,0.971,0.7753,0.0,"e","E",0.6,0,{"E":3,"V":2}],[29,30,1.9219,0.5553,0.0,"+","A",0.4,0,{"A":2,"F":1,"L":1,"V":1}],[30,31,1.371,0.6828,0.0,"l","L",0.6,0,{"F":1,"L":3,"Y":1}],[31,32,2.3219,0.4628,0.0,".","A",0.2,0,{"A":1,"E":1,"G":1,"I":1,"T":1}],[32,33,0.7219,0.833,0.0,"R","R",0.8,0,{"R":4,"S":1}],[33,34,1.371,0.6828,0.0,"l","L",0.6,0,{"I":1,"L":3,"M":1}],[34,35,0.971,0.7753,0.0,"f","F",0.6,0,{"F":3,"L":2}],[35,36,2.3219,0.4628,0.0,"+","A",0.2,0,{"A":1,"E":1,"K":1,"L":1,"V":1}],[36,37,2.3219,0.4628,0.0,".","G",0.2,0,{"G":1,"K":1,"L":1,"S":1,"V":1}],[37,38,2.3219,0.4628,0.0,"+","A",0.2,0,{"A":1,"E":1,"F":1,"H":1,"Y":1}],[38,39,0.0,1.0,0.0,"P","P",1.0,1,{"P":5}],[39,40,2.3219,0.4628,0.0,".","A",0.2,0,{"A":1,"D":1,"E":1,"T":1,"W":1}],[40,41,1.371,0.6828,0.0,"t","T",0.6,0,{"A":1,"L":1,"T":3}],[41,42,1.5219,0.6479,0.0,".","K",0.4,0,{"K":2,"L":2,"Q":1}],[42,43,2.3219,0.4628,0.0,".","D",0.2,0,{"D":1,"E":1,"P":1,"R":1,"T":1}],[43,44,1.9219,0.5553,0.0,"+","L",0.4,0,{"F":1,"K":1,"L":2,"Y":1}],[44,45,0.0,1.0,0.0,"F","F",1.0,1,{"F":5}],[45,46,2.3219,0.4628,0.0,".","D",0.2,0,{"D":1,"E":1,"P":1,"Q":1,"S":1}],[46,47,2.3219,0.4628,0.0,".","F",0.2,0,{"F":1,"H":1,"K":1,"S":1,"Y":1}],[47,48,1.371,0.6828,0.0,"f","F",0.6,0,{"F":3,"L":1,"N":1}],[48,49,1.585,0.38,0.4,"+","C",0.2,0,{"C":1,"G":1,"K":1}],[49,50,1.9219,0.5553,0.0,".","D",0.4,0,{"A":1,"D":2,"H":1,"R":1}],[50,51,1.371,0.6828,0.0,"l","L",0.6,0,{"L":3,"N":1,"Q":1}],[51,52,1.9219,0.5553,0.0,".","S",0.4,0,{"F":1,"G":1,"K":1,"S":2}],[52,53,1.5,0.5223,0.2,"+","S",0.4,0,{"S":2,"T":1,"V":1}],[53,54,2.0,0.4298,0.2,"+","D",0.2,0,{"D":1,"E":1,"P":1,"S":1}],[54,55,0.9183,0.4725,0.4,"+","D",0.4,0,{"D":2,"P":1}],[55,56,0.9183,0.4725,0.4,"+","E",0.4,0,{"A":1,"E":2}],[56,57,1.585,0.38,0.4,"+","D",0.2,0,{"D":1,"M":1,"V":1}],[57,58,2.3219,0.4628,0.0,".","C",0.2,0,{"C":1,"H":1,"K":1,"M":1,"P":1}],[58,59,1.9219,0.5553,0.0,".","G",0.4,0,{"A":1,"G":2,"L":1,"T":1}],[59,60,0.971,0.7753,0.0,"s","S",0.6,0,{"N":2,"S":3}],[60,61,1.9219,0.5553,0.0,".","P",0.4,0,{"A":1,"E":1,"P":2,"S":1}],[61,62,1.9219,0.5553,0.0,".","K",0.4,0,{"D":1,"K":2,"P":1,"Q":1}],[62,63,1.5219,0.6479,0.0,"+","L",0.4,0,{"E":1,"L":2,"V":2}],[63,64,1.371,0.6828,0.0,"k","K",0.6,0,{"F":1,"K":3,"T":1}],[64,65,1.9219,0.5553,0.0,".","G",0.4,0,{"A":1,"G":2,"K":1,"L":1}],[65,66,0.0,1.0,0.0,"H","H",1.0,1,{"H":5}],[66,67,1.371,0.6828,0.0,"g","G",0.6,0,{"A":1,"G":3,"I":1}],[67,68,1.9219,0.5553,0.0,"+","K",0.4,0,{"A":1,"E":1,"K":2,"R":1}],[68,69,0.7219,0.833,0.0,"K","K",0.8,0,{"K":4,"T":1}],[69,70,0.7219,0.833,0.0,"V","V",0.8,0,{"L":1,"V":4}],[70,71,1.9219,0.5553,0.0,"+","L",0.4,0,{"A":1,"F":1,"L":2,"M":1}],[71,72,2.3219,0.4628,0.0,".","A",0.2,0,{"A":1,"D":1,"G":1,"L":1,"T":1}],[72,73,1.371,0.6828,0.0,"a","A",0.6,0,{"A":3,"L":1,"V":1}],[73,74,1.9219,0.5553,0.0,"+","L",0.4,0,{"F":1,"I":1,"L":2,"V":1}],[74,75,2.3219,0.4628,0.0,".","D",0.2,0,{"D":1,"G":1,"R":1,"S":1,"T":1}],[75,76,1.9219,0.5553,0.0,".","D",0.4,0,{"A":1,"D":2,"G":1,"N":1}],[76,77,1.9219,0.5553,0.0,"+","A",0.4,0,{"A":2,"G":1,"I":1,"S":1}],[77,78,1.5219,0.6479,0.0,"+","L",0.4,0,{"A":1,"L":2,"V":2}],[78,79,1.9219,0.5553,0.0,".","A",0.4,0,{"A":2,"G":1,"K":1,"T":1}],[79,80,1.9219,0.5553,0.0,"+","H",0.4,0,{"H":2,"K":1,"N":1,"Q":1}],[80,81,1.5219,0.6479,0.0,"+","L",0.4,0,{"K":1,"L":2,"V":2}],[81,82,1.9219,0.5553,0.0,"+","D",0.4,0,{"D":2,"E":1,"G":1,"K":1}],[82,83,1.9219,0.5553,0.0,".","D",0.4,0,{"A":1,"D":2,"H":1,"N":1}],[83,84,1.9219,0.5553,0.0,"+","L",0.4,0,{"H":1,"L":2,"M":1,"S":1}],[84,85,2.3219,0.4628,0.0,".","E",0.2,0,{"E":1,"G":1,"K":1,"P":1,"S":1}],[85,86,2.3219,0.4628,0.0,"+","A",0.2,0,{"A":1,"G":1,"N":1,"S":1,"T":1}],[86,87,2.3219,0.4628,0.0,"+","A",0.2,0,{"A":1,"E":1,"L":1,"T":1,"V":1}],[87,88,2.3219,0.4628,0.0,"+","E",0.2,0,{"E":1,"F":1,"I":1,"L":1,"V":1}],[88,89,1.9219,0.5553,0.0,".","A",0.4,0,{"A":2,"E":1,"K":1,"S":1}],[89,90,2.3219,0.4628,0.0,".","A",0.2,0,{"A":1,"D":1,"P":1,"T":1,"Y":1}],[90,91,0.7219,0.833,0.0,"L","L",0.8,0,{"A":1,"L":4}],[91,92,1.5219,0.6479,0.0,".","A",0.4,0,{"A":2,"G":1,"S":2}],[92,93,2.3219,0.4628,0.0,".","D",0.2,0,{"D":1,"E":1,"L":1,"Q":1,"R":1}],[93,94,1.9219,0.5553,0.0,".","L",0.4,0,{"G":1,"K":1,"L":2,"S":1}],[94,95,0.0,1.0,0.0,"H","H",1.0,1,{"H":5}],[95,96,1.9219,0.5553,0.0,"+","A",0.4,0,{"A":2,"C":1,"R":1,"V":1}],[96,97,1.9219,0.5553,0.0,".","H",0.4,0,{"A":1,"D":1,"H":2,"T":1}],[97,98,1.371,0.6828,0.0,"k","K",0.6,0,{"A":1,"K":3,"V":1}],[98,99,1.9219,0.5553,0.0,".","L",0.4,0,{"G":1,"H":1,"L":2,"Q":1}],[99,100,1.9219,0.5553,0.0,"+","K",0.4,0,{"H":1,"K":2,"R":1,"V":1}],[100,101,1.9219,0.5553,0.0,"+","V",0.4,0,{"A":1,"I":1,"K":1,"V":2}],[101,102,1.9219,0.5553,0.0,".","D",0.4,0,{"D":2,"L":1,"P":1,"V":1}],[102,103,1.9219,0.5553,0.0,".","P",0.4,0,{"P":2,"S":1,"T":1,"V":1}],[103,104,2.3219,0.4628,0.0,".","D",0.2,0,{"D":1,"E":1,"K":1,"S":1,"V":1}],[104,105,1.9219,0.5553,0.0,".","N",0.4,0,{"F":1,"N":2,"P":1,"Y":1}],[105,106,1.9219,0.5553,0.0,"+","F",0.4,0,{"F":2,"L":1,"Q":1,"S":1}],[106,107,2.3219,0.4628,0.0,".","E",0.2,0,{"E":1,"F":1,"K":1,"R":1,"T":1}],[107,108,1.5219,0.6479,0.0,"+","L",0.4,0,{"F":1,"L":2,"V":2}],[108,109,1.9219,0.5553,0.0,"+","L",0.4,0,{"G":1,"I":1,"L":2,"V":1}],[109,110,1.9219,0.5553,0.0,".","S",0.4,0,{"E":1,"G":1,"S":2,"V":1}],[110,111,2.3219,0.4628,0.0,".","E",0.2,0,{"E":1,"H":1,"K":1,"N":1,"S":1}],[111,112,1.9219,0.5553,0.0,".","C",0.4,0,{"C":2,"E":1,"L":1,"V":1}],[112,113,1.371,0.6828,0.0,"l","L",0.6,0,{"A":1,"I":1,"L":3}],[113,114,1.9219,0.5553,0.0,"+","L",0.4,0,{"I":1,"L":2,"V":1,"Y":1}],[114,115,2.3219,0.4628,0.0,"+","C",0.2,0,{"C":1,"L":1,"M":1,"Q":1,"V":1}],[115,116,1.9219,0.5553,0.0,"+","V",0.4,0,{"K":1,"L":1,"T":1,"V":2}],[116,117,1.371,0.6828,0.0,"l","L",0.6,0,{"E":1,"L":3,"T":1}],[117,118,1.9219,0.5553,0.0,"+","A",0.4,0,{"A":2,"I":1,"K":1,"Q":1}],[118,119,2.3219,0.4628,0.0,".","A",0.2,0,{"A":1,"C":1,"H":1,"K":1,"S":1}],[119,120,1.9219,0.5553,0.0,"+","H",0.4,0,{"A":1,"H":2,"K":1,"L":1}],[120,121,2.3219,0.4628,0.0,"+","A",0.2,0,{"A":1,"F":1,"G":1,"H":1,"L":1}],[121,122,1.371,0.6828,0.0,"p","P",0.6,0,{"G":1,"P":3,"V":1}],[122,123,1.5219,0.6479,0.0,".","A",0.4,0,{"A":2,"G":2,"K":1}],[123,124,1.5219,0.6479,0.0,"+","D",0.4,0,{"D":2,"E":2,"F":1}],[124,125,1.371,0.6828,0.0,"f","F",0.6,0,{"F":3,"K":1,"T":1}],[125,126,1.9219,0.5553,0.0,".","T",0.4,0,{"G":1,"P":1,"T":2,"W":1}],[126,127,1.5219,0.6479,0.0,".","A",0.4,0,{"A":2,"P":2,"S":1}],[127,128,1.9219,0.5553,0.0,".","D",0.4,0,{"A":1,"D":2,"P":1,"T":1}],[128,129,1.9219,0.5553,0.0,"+","V",0.4,0,{"A":1,"E":1,"R":1,"V":2}],[129,130,1.9219,0.5553,0.0,".","Q",0.4,0,{"A":1,"H":1,"L":1,"Q":2}],[130,131,1.371,0.6828,0.0,"a","A",0.6,0,{"A":3,"G":1,"S":1}],[131,132,1.9219,0.5553,0.0,"+","A",0.4,0,{"A":2,"R":1,"S":1,"W":1}],[132,133,2.3219,0.4628,0.0,"+","A",0.2,0,{"A":1,"L":1,"M":1,"S":1,"Y":1}],[133,134,1.9219,0.5553,0.0,"+","Q",0.4,0,{"D":1,"N":1,"Q":2,"W":1}],[134,135,1.371,0.6828,0.0,"k","K",0.6,0,{"E":1,"K":3,"L":1}],[135,136,1.9219,0.5553,0.0,"+","V",0.4,0,{"A":1,"F":1,"V":2,"Y":1}],[136,137,1.9219,0.5553,0.0,"+","L",0.4,0,{"A":1,"G":1,"L":2,"V":1}],[137,138,1.371,0.6828,0.0,"a","A",0.6,0,{"A":3,"E":1,"Y":1}],[138,139,2.3219,0.4628,0.0,".","D",0.2,0,{"D":1,"G":1,"L":1,"S":1,"V":1}],[139,140,1.371,0.6828,0.0,"v","V",0.6,0,{"E":1,"F":1,"V":3}],[140,141,2.3219,0.4628,0.0,".","A",0.2,0,{"A":1,"L":1,"Q":1,"R":1,"S":1}],[141,142,1.9219,0.5553,0.0,".","A",0.4,0,{"A":2,"K":1,"N":1,"T":1}],[142,143,1.9219,0.5553,0.0,"+","A",0.4,0,{"A":2,"D":1,"M":1,"V":1}],[143,144,1.9219,0.5553,0.0,"+","L",0.4,0,{"A":1,"L":2,"M":1,"S":1}],[144,145,1.9219,0.5553,0.0,"+","A",0.4,0,{"A":2,"I":1,"R":1,"T":1}],[145,146,1.9219,0.5553,0.0,".","S",0.4,0,{"G":1,"H":1,"K":1,"S":2}],[146,147,1.371,0.6828,0.0,"k","K",0.6,0,{"K":3,"N":1,"W":1}],[147,148,1.371,0.6828,0.0,"y","Y",0.6,0,{"A":1,"D":1,"Y":3}],[148,149,2.0,0.4298,0.2,"+","G",0.2,0,{"G":1,"H":1,"K":1,"R":1}],[149,150,0.0,0.4,0.6,"+","E",0.4,0,{"E":2}],[150,151,0.0,0.2,0.8,"+","L",0.2,0,{"L":1}],[151,152,0.0,0.2,0.8,"+","G",0.2,0,{"G":1}],[152,153,0.0,0.2,0.8,"+","F",0.2,0,{"F":1}],[153,154,0.0,0.2,0.8,"+","Q",0.2,0,{"Q":1}],[154,155,0.0,0.2,0.8,"+","G",0.2,0,{"G":1}],[155,156,4.3219,0.0,1.0,"-","-",0.0,0,{}],[156,157,4.3219,0.0,1.0,"-","-",0.0,0,{}],[157,158,4.3219,0.0,1.0,"-","-",0.0,0,{}],[158,159,4.3219,0.0,1.0,"-","-",0.0,0,{}],[159,160,4.3219,0.0,1.0,"-","-",0.0,0,{}],[160,161,4.3219,0.0,1.0,"-","-",0.0,0,{}],[161,162,4.3219,0.0,1.0,"-","-",0.0,0,{}],[162,163,4.3219,0.0,1.0,"-","-",0.0,0,{}],[163,164,4.3219,0.0,1.0,"-","-",0.0,0,{}],[164,165,4.3219,0.0,1.0,"-","-",0.0,0,{}]],"identity_matrices":{"sequence_ids":["sp|P69905|HBA_HUMAN","sp|P68871|HBB_HUMAN","sp|P02144|MYG_HUMAN","sp|P02238|LGB1_SOYBN","sp|Q9NPG2|NGB_HUMAN"],"global":[[100.0,39.39,23.64,9.09,15.76],[39.39,100.0,22.42,12.12,13.33],[23.64,22.42,100.0,10.3,12.73],[9.09,12.12,10.3,100.0,7.27],[15.76,13.33,12.73,7.27,100.0]],"coverage":[[100.0,45.77,27.46,10.56,18.31],[45.77,100.0,25.17,13.89,14.97],[27.46,25.17,100.0,11.81,14.29],[10.56,13.89,11.81,100.0,8.33],[18.31,14.97,14.29,8.33,100.0]],"overlap":[[100.0,43.62,26.17,10.14,17.45],[43.62,100.0,24.83,13.51,14.77],[26.17,24.83,100.0,11.49,14.0],[10.14,13.51,11.49,100.0,8.11],[17.45,14.77,14.0,8.11,100.0]],"pairwise_details":[{"seq_a":"sp|P69905|HBA_HUMAN","seq_b":"sp|P68871|HBB_HUMAN","matches":65,"aligned_length":165,"min_unaligned_length":142,"overlap_length":149,"terminal_gaps":16,"internal_gaps":9,"global_identity":39.39,"coverage_identity":45.77,"overlap_identity":43.62},{"seq_a":"sp|P69905|HBA_HUMAN","seq_b":"sp|P02144|MYG_HUMAN","matches":39,"aligned_length":165,"min_unaligned_length":142,"overlap_length":149,"terminal_gaps":16,"internal_gaps":8,"global_identity":23.64,"coverage_identity":27.46,"overlap_identity":26.17},{"seq_a":"sp|P69905|HBA_HUMAN","seq_b":"sp|P02238|LGB1_SOYBN","matches":15,"aligned_length":165,"min_unaligned_length":142,"overlap_length":148,"terminal_gaps":17,"internal_gaps":7,"global_identity":9.09,"coverage_identity":10.56,"overlap_identity":10.14},{"seq_a":"sp|P69905|HBA_HUMAN","seq_b":"sp|Q9NPG2|NGB_HUMAN","matches":26,"aligned_length":165,"min_unaligned_length":142,"overlap_length":149,"terminal_gaps":16,"internal_gaps":10,"global_identity":15.76,"coverage_identity":18.31,"overlap_identity":17.45},{"seq_a":"sp|P68871|HBB_HUMAN","seq_b":"sp|P02144|MYG_HUMAN","matches":37,"aligned_length":165,"min_unaligned_length":147,"overlap_length":149,"terminal_gaps":16,"internal_gaps":3,"global_identity":22.42,"coverage_identity":25.17,"overlap_identity":24.83},{"seq_a":"sp|P68871|HBB_HUMAN","seq_b":"sp|P02238|LGB1_SOYBN","matches":20,"aligned_length":165,"min_unaligned_length":144,"overlap_length":148,"terminal_gaps":17,"internal_gaps":6,"global_identity":12.12,"coverage_identity":13.89,"overlap_identity":13.51},{"seq_a":"sp|P68871|HBB_HUMAN","seq_b":"sp|Q9NPG2|NGB_HUMAN","matches":22,"aligned_length":165,"min_unaligned_length":147,"overlap_length":149,"terminal_gaps":16,"internal_gaps":5,"global_identity":13.33,"coverage_identity":14.97,"overlap_identity":14.77},{"seq_a":"sp|P02144|MYG_HUMAN","seq_b":"sp|P02238|LGB1_SOYBN","matches":17,"aligned_length":165,"min_unaligned_length":144,"overlap_length":148,"terminal_gaps":17,"internal_gaps":5,"global_identity":10.3,"coverage_identity":11.81,"overlap_identity":11.49},{"seq_a":"sp|P02144|MYG_HUMAN","seq_b":"sp|Q9NPG2|NGB_HUMAN","matches":21,"aligned_length":165,"min_unaligned_length":147,"overlap_length":150,"terminal_gaps":15,"internal_gaps":4,"global_identity":12.73,"coverage_identity":14.29,"overlap_identity":14.0},{"seq_a":"sp|P02238|LGB1_SOYBN","seq_b":"sp|Q9NPG2|NGB_HUMAN","matches":12,"aligned_length":165,"min_unaligned_length":144,"overlap_length":148,"terminal_gaps":17,"internal_gaps":7,"global_identity":7.27,"coverage_identity":8.33,"overlap_identity":8.11}],"external_pim":[[100.0,43.66,26.06,18.75,16.33],[43.66,100.0,25.17,19.44,15.65],[26.06,25.17,100.0,17.36,16.33],[18.75,19.44,17.36,100.0,14.58],[16.33,15.65,16.33,14.58,100.0]]},"features":{"reference_id":"sp|P69905|HBA_HUMAN","resolved_reference_id":"sp|P69905|HBA_HUMAN","mapped_features":[{"name":"Distal Histidine (E7)","type":"active_site","description":"","unaligned_position":59,"alignment_column_index":65,"alignment_column_position":66,"reference_aa":"H","column_conservation":1.0,"column_entropy":0.0,"is_invariant":true,"conservation_state":"invariant","status":"mapped","residues_across_msa":{"sp|P69905|HBA_HUMAN":"H","sp|P68871|HBB_HUMAN":"H","sp|P02144|MYG_HUMAN":"H","sp|P02238|LGB1_SOYBN":"H","sp|Q9NPG2|NGB_HUMAN":"H"}},{"name":"Proximal Histidine (F8)","type":"binding_site","description":"","unaligned_position":88,"alignment_column_index":94,"alignment_column_position":95,"reference_aa":"H","column_conservation":1.0,"column_entropy":0.0,"is_invariant":true,"conservation_state":"invariant","status":"mapped","residues_across_msa":{"sp|P69905|HBA_HUMAN":"H","sp|P68871|HBB_HUMAN":"H","sp|P02144|MYG_HUMAN":"H","sp|P02238|LGB1_SOYBN":"H","sp|Q9NPG2|NGB_HUMAN":"H"}},{"name":"Heme Pocket Phe (CD1)","type":"binding_site","description":"","unaligned_position":44,"alignment_column_index":44,"alignment_column_position":45,"reference_aa":"F","column_conservation":1.0,"column_entropy":0.0,"is_invariant":true,"conservation_state":"invariant","status":"mapped","residues_across_msa":{"sp|P69905|HBA_HUMAN":"F","sp|P68871|HBB_HUMAN":"F","sp|P02144|MYG_HUMAN":"F","sp|P02238|LGB1_SOYBN":"F","sp|Q9NPG2|NGB_HUMAN":"F"}}]},"phylotree":{"newick":"(((sp|P69905|HBA_HUMAN:0.28140,sp|P68871|HBB_HUMAN:0.26860):0.11520,sp|P02144|MYG_HUMAN:0.36790):0.08410,(sp|P02238|LGB1_SOYBN:0.41250,sp|Q9NPG2|NGB_HUMAN:0.42810):0.06190);","layout":{"root":{"name":"root","length":0.0,"children":[{"name":"","length":0.0841,"children":[{"name":"","length":0.1152,"children":[{"name":"sp|P69905|HBA_HUMAN","length":0.2814,"children":[],"x_dist":0.4807,"y_pos":0.0,"is_leaf":true},{"name":"sp|P68871|HBB_HUMAN","length":0.2686,"children":[],"x_dist":0.4679,"y_pos":1.0,"is_leaf":true}],"x_dist":0.1993,"y_pos":0.5,"is_leaf":false},{"name":"sp|P02144|MYG_HUMAN","length":0.3679,"children":[],"x_dist":0.452,"y_pos":2.0,"is_leaf":true}],"x_dist":0.0841,"y_pos":1.25,"is_leaf":false},{"name":"","length":0.0619,"children":[{"name":"sp|P02238|LGB1_SOYBN","length":0.4125,"children":[],"x_dist":0.4744,"y_pos":3.0,"is_leaf":true},{"name":"sp|Q9NPG2|NGB_HUMAN","length":0.4281,"children":[],"x_dist":0.49,"y_pos":4.0,"is_leaf":true}],"x_dist":0.0619,"y_pos":3.5,"is_leaf":false}],"x_dist":0.0,"y_pos":2.375,"is_leaf":false},"leaves":["sp|P69905|HBA_HUMAN","sp|P68871|HBB_HUMAN","sp|P02144|MYG_HUMAN","sp|P02238|LGB1_SOYBN","sp|Q9NPG2|NGB_HUMAN"],"num_leaves":5,"max_distance":0.49}},"color_palettes":{"ClustalX":{"A":"#1F77B4","I":"#1F77B4","L":"#1F77B4","M":"#1F77B4","F":"#1F77B4","W":"#1F77B4","V":"#1F77B4","N":"#2CA02C","Q":"#2CA02C","S":"#2CA02C","T":"#2CA02C","G":"#2CA02C","D":"#E377C2","E":"#E377C2","K":"#D62728","R":"#D62728","C":"#FF7F0E","P":"#FF7F0E","H":"#17BECF","Y":"#17BECF","-":"#94A3B8",".":"#94A3B8","X":"#94A3B8"},"Zappo":{"I":"#FFA07A","L":"#FFA07A","V":"#FFA07A","A":"#FFA07A","M":"#FFA07A","F":"#FFA07A","W":"#FFA07A","Y":"#FFA07A","K":"#0000FF","R":"#0000FF","H":"#0000FF","D":"#FF0000","E":"#FF0000","S":"#00FF00","T":"#00FF00","N":"#00FF00","Q":"#00FF00","P":"#FF00FF","G":"#FF00FF","C":"#FFFF00","-":"#94A3B8",".":"#94A3B8","X":"#94A3B8"},"Taylor":{"A":"#CCFF00","R":"#0000FF","N":"#CC00FF","D":"#FF0000","C":"#FFFF00","Q":"#FF00CC","E":"#FF0066","G":"#FF9900","H":"#0066FF","I":"#66FF00","L":"#33FF00","K":"#6600FF","M":"#00FF00","F":"#00FF66","P":"#FFCC00","S":"#FF3300","T":"#FF6600","W":"#00CCFF","Y":"#00FFCC","V":"#99FF00","-":"#94A3B8",".":"#94A3B8","X":"#94A3B8"},"Hydrophobicity":{"I":"#D7191C","V":"#DC2B24","L":"#E3432F","F":"#EF7546","C":"#F48850","M":"#F9AA60","A":"#FBB265","G":"#E6F598","T":"#D1EC9C","S":"#C7E89E","W":"#BBE3A1","Y":"#99D5A4","P":"#80C7A5","H":"#4393C3","E":"#3682BA","Q":"#3682BA","D":"#3682BA","N":"#3682BA","K":"#2B6CB0","R":"#1E4E8C","-":"#94A3B8",".":"#94A3B8","X":"#94A3B8"},"Monochromatic":{"A":"#475569","C":"#475569","D":"#475569","E":"#475569","F":"#475569","G":"#475569","H":"#475569","I":"#475569","K":"#475569","L":"#475569","M":"#475569","N":"#475569","P":"#475569","Q":"#475569","R":"#475569","S":"#475569","T":"#475569","V":"#475569","W":"#475569","Y":"#475569","-":"#94A3B8",".":"#94A3B8","X":"#94A3B8"}},"kyte_doolittle":{"I":4.5,"V":4.2,"L":3.8,"F":2.8,"C":2.5,"M":1.9,"A":1.8,"G":-0.4,"T":-0.7,"S":-0.8,"W":-0.9,"Y":-1.3,"P":-1.6,"H":-3.2,"E":-3.5,"Q":-3.5,"D":-3.5,"N":-3.5,"K":-3.9,"R":-4.5,"-":0.0},"citations":[{"label":"Clustal Omega","authors":"Sievers, F. et al.","title":"Fast, scalable generation of high-quality protein multiple sequence alignments using Clustal Omega.","journal":"Molecular Systems Biology 7, 539 (2011).","doi":"10.1038/msb.2011.75","url":"https://doi.org/10.1038/msb.2011.75"},{"label":"EBI Job Dispatcher 2024","authors":"Madeira, F. et al.","title":"The EMBL-EBI Job Dispatcher sequence analysis tools framework in 2024.","journal":"Nucleic Acids Research 52 (W1), W521-W525 (2024).","doi":"10.1093/nar/gkae241","url":"https://doi.org/10.1093/nar/gkae241"},{"label":"EBI Analysis Framework","authors":"Goujon, M. et al.","title":"A new bioinformatics analysis tools framework at EMBL-EBI.","journal":"Nucleic Acids Research 38 (suppl_2), W695-W699 (2010).","doi":"10.1093/nar/gkq313","url":"https://doi.org/10.1093/nar/gkq313"}],"disclaimer":"AS-IS Scientific Disclaimer: Multiple sequence alignments, conservation scores, and phylogenetic guide trees generated by this pipeline are heuristic computational predictions produced via EMBL-EBI Clustal Omega. They must not be treated as definitive structural, clinical, or evolutionary evidence without independent biochemical and experimental validation."}</script>
+  <script>
+(function() {
+  const dataEl = document.getElementById("msa-data");
+  if (!dataEl) return;
+  const MSA = JSON.parse(dataEl.textContent);
+  if (MSA.columns && MSA.columns.length > 0 && Array.isArray(MSA.columns[0])) {
+    MSA.columns = MSA.columns.map(function(c) {
+      return {
+        index: c[0],
+        position: c[1],
+        shannon_entropy: c[2],
+        conservation_score: c[3],
+        gap_rate: c[4],
+        consensus_aa: c[5],
+        modal_aa: c[6],
+        modal_frequency: c[7],
+        is_invariant: Boolean(c[8]),
+        aa_counts: c[9]
+      };
+    });
+  }
+
+  let activeColorScheme = "ClustalX";
+  let consensusThreshold = 0.80;
+  let activeHighlightCol = null;
+  let activeHighlightSeqId = null;
+  let motifMatchedCols = new Set();
+
+  // Initialize saved or system theme safely for iframe environments
+  try {
+    const savedTheme = window.localStorage ? window.localStorage.getItem("msa_dashboard_theme") : null;
+    if (savedTheme === "dark" || savedTheme === "light") {
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    }
+  } catch (e) {}
+
+  const seqLabelsEl = document.getElementById("msa-sequence-labels");
+  const rulerTrackEl = document.getElementById("msa-ruler-track");
+  const consTrackEl = document.getElementById("msa-conservation-track");
+  const seqTracksEl = document.getElementById("msa-sequence-tracks");
+  const consensusTrackEl = document.getElementById("msa-consensus-track");
+  const scrollViewportEl = document.getElementById("msa-scroll-viewport");
+
+  function getResidueColor(aa, scheme) {
+    const pal = (MSA.color_palettes && MSA.color_palettes[scheme]) || MSA.color_palettes["ClustalX"];
+    return pal[(aa || "-").toUpperCase()] || "#94A3B8";
+  }
+
+  function escapeHtml(val) {
+    return String(val == null ? "" : val)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function getConservationColor(score) {
+    if (score >= 0.75) return "#16A34A";
+    if (score >= 0.45) return "#D97706";
+    return "#94A3B8";
+  }
+
+  function computeConsensusChar(col, threshold) {
+    if (col.gap_rate >= 1.0 || col.modal_aa === "-") return "-";
+    if (col.modal_frequency >= threshold) return col.modal_aa.toUpperCase();
+    if (col.modal_frequency >= 0.50) return col.modal_aa.toLowerCase();
+    return col.consensus_aa;
+  }
+
+  function renderInputProfiles() {
+    const tbody = document.getElementById("input-profile-tbody");
+    if (!tbody || !MSA.input_profiles) return;
+    tbody.innerHTML = "";
+
+    MSA.input_profiles.forEach(function(prof, idx) {
+      const tr = document.createElement("tr");
+      tr.className = "input-profile-row" + (activeHighlightSeqId === prof.id ? " active-seq-row" : "");
+      tr.dataset.seqId = prof.id;
+      const c = prof.composition_pct;
+      tr.innerHTML =
+        "<td><strong>[" + (idx + 1) + "] " + prof.id + "</strong></td>" +
+        "<td>" + prof.unaligned_length + " aa</td>" +
+        "<td>" + prof.aligned_length + " cols (+" + prof.inserted_gaps + " gaps)</td>" +
+        "<td>" + prof.gravy_hydropathy.toFixed(2) + "</td>" +
+        "<td>" +
+          "<div class='comp-bar-stack' title='Hydrophobic: " + c.hydrophobic + "% | Polar: " + c.polar + "% | Basic: " + c.basic + "% | Acidic: " + c.acidic + "% | Special: " + c.special + "%'>" +
+            "<div style='width:" + c.hydrophobic + "%;background:#1F77B4;'></div>" +
+            "<div style='width:" + c.polar + "%;background:#2CA02C;'></div>" +
+            "<div style='width:" + c.basic + "%;background:#D62728;'></div>" +
+            "<div style='width:" + c.acidic + "%;background:#E377C2;'></div>" +
+            "<div style='width:" + c.special + "%;background:#FF7F0E;'></div>" +
+          "</div>" +
+        "</td>" +
+        "<td style='font-family:monospace;font-size:0.75rem;'>" +
+          "H:" + c.hydrophobic + "% P:" + c.polar + "% B:" + c.basic + "% A:" + c.acidic + "%" +
+        "</td>";
+      tr.addEventListener("click", function() {
+        toggleSequenceHighlight(prof.id);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderAlignmentTracks() {
+    if (!seqLabelsEl || !rulerTrackEl || !consTrackEl || !seqTracksEl || !consensusTrackEl) return;
+    seqLabelsEl.innerHTML = "";
+    rulerTrackEl.innerHTML = "";
+    consTrackEl.innerHTML = "";
+    seqTracksEl.innerHTML = "";
+    consensusTrackEl.innerHTML = "";
+
+    MSA.columns.forEach(function(col) {
+      const tick = document.createElement("div");
+      tick.className = "msa-ruler-tick";
+      if (col.position === 1 || col.position % 10 === 0) {
+        tick.textContent = String(col.position);
+      } else if (col.position % 5 === 0) {
+        tick.textContent = ".";
+      }
+      rulerTrackEl.appendChild(tick);
+
+      const barWrap = document.createElement("div");
+      barWrap.className = "msa-cons-bar-wrapper";
+      barWrap.title = "Column " + col.position + " | Conservation: " + col.conservation_score.toFixed(3) + " | H: " + col.shannon_entropy.toFixed(3) + " bits";
+      barWrap.addEventListener("click", function() {
+        inspectColumn(col.index);
+      });
+
+      const bar = document.createElement("div");
+      bar.className = "msa-cons-bar";
+      const hPct = Math.max(6, Math.round(col.conservation_score * 38));
+      bar.style.height = hPct + "px";
+      bar.style.backgroundColor = getConservationColor(col.conservation_score);
+      barWrap.appendChild(bar);
+      consTrackEl.appendChild(barWrap);
+
+      const consCell = document.createElement("div");
+      consCell.className = "msa-cell";
+      const consChar = computeConsensusChar(col, consensusThreshold);
+      consCell.textContent = consChar;
+      if (consChar !== "-" && consChar !== "." && consChar !== "+") {
+        consCell.style.backgroundColor = getResidueColor(consChar, activeColorScheme) + "33";
+      }
+      consCell.addEventListener("click", function() {
+        inspectColumn(col.index);
+      });
+      consensusTrackEl.appendChild(consCell);
+    });
+
+    MSA.sequences.forEach(function(seqObj) {
+      const labelRow = document.createElement("div");
+      labelRow.className = "msa-seq-label-row" + (activeHighlightSeqId === seqObj.id ? " active-seq-row" : "");
+      labelRow.dataset.seqId = seqObj.id;
+      labelRow.title = seqObj.description;
+      labelRow.innerHTML = "<span>" + seqObj.id + "</span><span class='text-muted'>" + seqObj.unaligned_length + " aa</span>";
+      labelRow.addEventListener("click", function() {
+        toggleSequenceHighlight(seqObj.id);
+      });
+      seqLabelsEl.appendChild(labelRow);
+
+      const trackRow = document.createElement("div");
+      trackRow.className = "msa-seq-row" + (activeHighlightSeqId === seqObj.id ? " active-seq-row" : "");
+      trackRow.dataset.seqId = seqObj.id;
+
+      const alignedStr = seqObj.aligned_sequence;
+      for (let i = 0; i < alignedStr.length; i++) {
+        const aa = alignedStr[i];
+        const cell = document.createElement("div");
+        let cls = "msa-cell";
+        if (activeHighlightCol === i) cls += " highlighted-col";
+        if (motifMatchedCols.has(i)) cls += " motif-match-cell";
+        cell.className = cls;
+        cell.dataset.colIndex = String(i);
+        cell.textContent = aa;
+        if (aa !== "-" && aa !== ".") {
+          const hex = getResidueColor(aa, activeColorScheme);
+          cell.style.backgroundColor = hex + "40";
+        } else {
+          cell.style.color = "var(--text-muted)";
+        }
+        cell.addEventListener("click", function() {
+          inspectColumn(i);
+        });
+        trackRow.appendChild(cell);
+      }
+      seqTracksEl.appendChild(trackRow);
+    });
+  }
+
+  function inspectColumn(colIdx, scrollIntoView) {
+    if (colIdx < 0 || colIdx >= MSA.columns.length) return;
+    activeHighlightCol = colIdx;
+    const col = MSA.columns[colIdx];
+    const titleEl = document.getElementById("inspector-title");
+    const badgeEl = document.getElementById("inspector-badge");
+    const bodyEl = document.getElementById("inspector-body");
+
+    if (titleEl) {
+      titleEl.textContent = "Column " + col.position + " (0-based index: " + col.index + ") | Consensus: " + col.consensus_aa;
+    }
+    if (badgeEl) {
+      badgeEl.textContent = col.is_invariant ? "INVARIANT (100%)" : ("Conservation: " + (col.conservation_score * 100).toFixed(1) + "%");
+    }
+    if (bodyEl) {
+      const distParts = Object.entries(col.aa_counts).map(function(kv) {
+        return kv[0] + ": " + kv[1];
+      }).join(", ") || "All Gaps";
+      const perSeqItems = MSA.sequences.map(function(s) {
+        return "<code>" + s.id + ": <strong>" + s.aligned_sequence[colIdx] + "</strong></code>";
+      }).join(" &nbsp;|&nbsp; ");
+      bodyEl.innerHTML =
+        "<div><strong>Shannon Entropy:</strong> " + col.shannon_entropy.toFixed(4) + " bits &nbsp;|&nbsp; " +
+        "<strong>Normalized Conservation:</strong> " + col.conservation_score.toFixed(4) + " &nbsp;|&nbsp; " +
+        "<strong>Gap Rate:</strong> " + (col.gap_rate * 100).toFixed(1) + "% &nbsp;|&nbsp; " +
+        "<strong>Distribution:</strong> " + distParts + "</div>" +
+        "<div style='margin-top:8px;'>" + perSeqItems + "</div>";
+    }
+
+    renderAlignmentTracks();
+    if (scrollIntoView && scrollViewportEl) {
+      const cellPx = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--cell-size")) || 18;
+      const targetLeft = Math.max(0, (colIdx * cellPx) - (scrollViewportEl.clientWidth / 2));
+      scrollViewportEl.scrollTo({ left: targetLeft, behavior: "smooth" });
+    }
+  }
+
+  function updateSelectedNodePanel(seqId) {
+    const box = document.getElementById("selected-node-details");
+    if (!box) return;
+    if (!seqId) {
+      box.innerHTML = "<div class='text-muted'>Click a node in the 3D view, sequence row, or tree leaf to inspect its pairwise homology connections.</div>";
+      return;
+    }
+    const idx = MSA.identity_matrices.sequence_ids.indexOf(seqId);
+    const prof = (MSA.input_profiles || []).find(function(p) { return p.id === seqId; });
+    if (idx < 0) return;
+
+    const row = MSA.identity_matrices.coverage[idx] || MSA.identity_matrices.global[idx];
+    const neighbors = [];
+    for (let j = 0; j < row.length; j++) {
+      if (j !== idx) {
+        neighbors.push({ id: MSA.identity_matrices.sequence_ids[j], pct: row[j] });
+      }
+    }
+    neighbors.sort(function(a, b) { return b.pct - a.pct; });
+    const topStr = neighbors.map(function(n) {
+      return "<div style='display:flex;justify-content:space-between;margin-top:3px;'><span>" + n.id.split("|").pop() + "</span><strong>" + n.pct.toFixed(1) + "%</strong></div>";
+    }).join("");
+
+    box.innerHTML =
+      "<div><strong>" + seqId + "</strong></div>" +
+      "<div style='font-size:0.76rem;color:var(--text-muted);margin-bottom:6px;'>Unaligned: " + (prof ? prof.unaligned_length : "--") + " aa | GRAVY: " + (prof ? prof.gravy_hydropathy : "--") + "</div>" +
+      "<div style='font-size:0.76rem;font-weight:600;border-top:1px solid var(--border-color);padding-top:6px;'>Homology Ranking (Coverage ID):</div>" +
+      topStr;
+  }
+
+  function toggleSequenceHighlight(seqId) {
+    activeHighlightSeqId = (activeHighlightSeqId === seqId) ? null : seqId;
+    renderInputProfiles();
+    renderAlignmentTracks();
+    updateSelectedNodePanel(activeHighlightSeqId);
+  }
+
+  function getPimColor(pct) {
+    if (pct >= 90) return "#059669";
+    if (pct >= 70) return "#10B981";
+    if (pct >= 50) return "#0D9488";
+    if (pct >= 35) return "#0284C7";
+    if (pct >= 20) return "#2563EB";
+    return "#1E3A8A";
+  }
+
+  function renderPimMatrix(metricKey) {
+    const container = document.getElementById("pim-heatmap-container");
+    const consValEl = document.getElementById("pim-conservation-index-val");
+    const meanValEl = document.getElementById("pim-active-mean-val");
+    const tooltipEl = document.getElementById("pim-tooltip");
+    if (!container) return;
+
+    if (consValEl) {
+      consValEl.textContent = MSA.summary.conservation_index.toFixed(2) + "% (" + MSA.summary.invariant_columns + "/" + MSA.summary.alignment_length + " invariant cols)";
+    }
+
+    const ids = MSA.identity_matrices.sequence_ids;
+    let matrix = MSA.identity_matrices.global;
+    if (metricKey === "coverage") matrix = MSA.identity_matrices.coverage;
+    else if (metricKey === "overlap") matrix = MSA.identity_matrices.overlap;
+    else if (metricKey === "external" && MSA.identity_matrices.external_pim) {
+      matrix = MSA.identity_matrices.external_pim;
+    }
+
+    let offDiagSum = 0;
+    let offDiagCount = 0;
+    for (let i = 0; i < ids.length; i++) {
+      for (let j = 0; j < ids.length; j++) {
+        if (i !== j) {
+          offDiagSum += matrix[i][j];
+          offDiagCount++;
+        }
+      }
+    }
+    if (meanValEl) {
+      const meanPct = offDiagCount > 0 ? (offDiagSum / offDiagCount) : 100.0;
+      meanValEl.textContent = meanPct.toFixed(2) + "%";
+    }
+
+    let htmlStr = "<table class='pim-table'><thead><tr><th>Sequence ID</th>";
+    ids.forEach(function(id, idx) {
+      htmlStr += "<th title='" + id + "'>[" + (idx + 1) + "] " + id.split("|").pop() + "</th>";
+    });
+    htmlStr += "</tr></thead><tbody>";
+
+    for (let i = 0; i < ids.length; i++) {
+      htmlStr += "<tr><th title='" + ids[i] + "'>[" + (i + 1) + "] " + ids[i] + "</th>";
+      for (let j = 0; j < ids.length; j++) {
+        const val = matrix[i][j];
+        const bg = getPimColor(val);
+        htmlStr += "<td class='pim-cell' data-row='" + i + "' data-col='" + j + "' style='background-color:" + bg + ";'>" + val.toFixed(1) + "%</td>";
+      }
+      htmlStr += "</tr>";
+    }
+    htmlStr += "</tbody></table>";
+    container.innerHTML = htmlStr;
+
+    container.querySelectorAll(".pim-cell").forEach(function(cell) {
+      cell.addEventListener("mouseenter", function() {
+        const r = parseInt(cell.dataset.row, 10);
+        const c = parseInt(cell.dataset.col, 10);
+        const idA = ids[r];
+        const idB = ids[c];
+        const detail = (MSA.identity_matrices.pairwise_details || []).find(function(d) {
+          return (d.seq_a === idA && d.seq_b === idB) || (d.seq_a === idB && d.seq_b === idA);
+        });
+        if (tooltipEl) {
+          tooltipEl.classList.remove("hidden");
+          if (r === c) {
+            tooltipEl.innerHTML = "<strong>" + idA + " (Self Comparison)</strong>: 100.0% identity (" + MSA.sequences[r].unaligned_length + " residues)";
+          } else if (detail) {
+            tooltipEl.innerHTML =
+              "<strong>Pair:</strong> " + idA + " vs " + idB + " &nbsp;|&nbsp; " +
+              "<strong>Identical Matches:</strong> " + detail.matches + " aa &nbsp;|&nbsp; " +
+              "<strong>Global:</strong> " + detail.global_identity.toFixed(2) + "% &nbsp;|&nbsp; " +
+              "<strong>Coverage:</strong> " + detail.coverage_identity.toFixed(2) + "% &nbsp;|&nbsp; " +
+              "<strong>Overlap:</strong> " + detail.overlap_identity.toFixed(2) + "% &nbsp;|&nbsp; " +
+              "<strong>Terminal Gaps:</strong> " + detail.terminal_gaps;
+          } else {
+            tooltipEl.innerHTML = "<strong>Pair:</strong> " + idA + " vs " + idB + ": " + matrix[r][c].toFixed(2) + "%";
+          }
+        }
+      });
+    });
+  }
+
+  function renderFeatureMapper() {
+    const gridEl = document.getElementById("feature-cards-grid");
+    if (!gridEl) return;
+    const mapped = (MSA.features && MSA.features.mapped_features) || [];
+    if (mapped.length === 0) {
+      gridEl.innerHTML = "<div class='text-muted'>No pre-configured functional features passed via --features. Use the coordinate projector above to map any 1-based residue coordinate onto the alignment.</div>";
+      return;
+    }
+    gridEl.innerHTML = "";
+    mapped.forEach(function(feat) {
+      const card = document.createElement("div");
+      card.className = "feature-card";
+      if (feat.status === "mapped") {
+        const resList = Object.entries(feat.residues_across_msa || {}).map(function(kv) {
+          return kv[0].split("|").pop() + ":" + kv[1];
+        }).join(" | ");
+        card.innerHTML =
+          "<div style='display:flex;justify-content:space-between;align-items:center;'>" +
+            "<strong>" + feat.name + "</strong>" +
+            "<span class='status-badge'>" + (feat.conservation_state || "mapped").toUpperCase() + "</span>" +
+          "</div>" +
+          "<div style='font-size:0.8rem;margin-top:6px;color:var(--text-muted);'>" +
+            "Ref Pos: <strong>" + feat.unaligned_position + " (" + feat.reference_aa + ")</strong> -> " +
+            "MSA Column: <strong>" + feat.alignment_column_position + "</strong> (Conservation: " + (feat.column_conservation * 100).toFixed(1) + "%)" +
+          "</div>" +
+          "<div style='font-size:0.75rem;margin-top:6px;font-family:monospace;'>" + resList + "</div>";
+        card.addEventListener("click", function() {
+          inspectColumn(feat.alignment_column_index, true);
+        });
+      } else {
+        card.innerHTML =
+          "<strong>" + feat.name + " (Unmapped)</strong>" +
+          "<div style='font-size:0.8rem;color:#DC2626;margin-top:4px;'>" + (feat.error || "Coordinate out of range") + "</div>";
+      }
+      gridEl.appendChild(card);
+    });
+  }
+
+  // Interactive 3D Sequence Homology Network & 3D Conservation Landscape
+  function init3DHomologyExplorer() {
+    const viewport = document.getElementById("homology-3d-viewport");
+    if (!viewport) return;
+    const modeSelect = document.getElementById("view-3d-mode-select");
+    const threshSlider = document.getElementById("edge-threshold-slider");
+    const threshLabel = document.getElementById("edge-threshold-val");
+    const autoRotBtn = document.getElementById("toggle-autorotate-btn");
+    const resetViewBtn = document.getElementById("reset-3d-view-btn");
+
+    const seqs = MSA.sequences || [];
+    const n = seqs.length;
+    const nodeColors = ["#38BDF8", "#10B981", "#F59E0B", "#EC4899", "#A855F7", "#14B8A6", "#F97316"];
+    const nodes = seqs.map(function(s, i) {
+      const angle = (2 * Math.PI * i) / Math.max(1, n);
+      const radius = 110;
+      return {
+        index: i,
+        id: s.id,
+        label: s.id.split("|").pop(),
+        length: s.unaligned_length,
+        x: Math.cos(angle) * radius,
+        y: ((i % 2 === 0) ? 1 : -1) * 40 + (i - (n - 1) / 2) * 18,
+        z: Math.sin(angle) * radius,
+        vx: 0,
+        vy: 0,
+        vz: 0,
+        color: nodeColors[i % nodeColors.length],
+        screenX: 0,
+        screenY: 0,
+        screenR: 12
+      };
+    });
+
+    let rotX = 0.32;
+    let rotY = -0.45;
+    let zoom = 1.0;
+    let autoRotate = true;
+    let viewMode = "network";
+    let edgeThreshold = 15;
+    let isDragging = false;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+
+    function stepNodeLayout() {
+      const mat = MSA.identity_matrices.coverage || MSA.identity_matrices.global;
+      const kRepel = 4200;
+      const kSpring = 0.018;
+      const damping = 0.82;
+
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          const dx = nodes[j].x - nodes[i].x;
+          const dy = nodes[j].y - nodes[i].y;
+          const dz = nodes[j].z - nodes[i].z;
+          const distSq = dx * dx + dy * dy + dz * dz + 10.0;
+          const dist = Math.sqrt(distSq);
+
+          // Repulsion
+          const fRep = kRepel / distSq;
+          const rx = (dx / dist) * fRep;
+          const ry = (dy / dist) * fRep;
+          const rz = (dz / dist) * fRep;
+          nodes[i].vx -= rx;
+          nodes[i].vy -= ry;
+          nodes[i].vz -= rz;
+          nodes[j].vx += rx;
+          nodes[j].vy += ry;
+          nodes[j].vz += rz;
+
+          // Homology attraction proportional to sequence identity
+          const ident = (mat[i] && mat[i][j]) ? mat[i][j] : 20.0;
+          const targetDist = Math.max(55, 210 - ident * 1.45);
+          const diff = dist - targetDist;
+          const fAttr = kSpring * diff;
+          const ax = (dx / dist) * fAttr;
+          const ay = (dy / dist) * fAttr;
+          const az = (dz / dist) * fAttr;
+          nodes[i].vx += ax;
+          nodes[i].vy += ay;
+          nodes[i].vz += az;
+          nodes[j].vx -= ax;
+          nodes[j].vy -= ay;
+          nodes[j].vz -= az;
+        }
+      }
+
+      for (let i = 0; i < n; i++) {
+        // Gentle centering
+        nodes[i].vx -= nodes[i].x * 0.008;
+        nodes[i].vy -= nodes[i].y * 0.008;
+        nodes[i].vz -= nodes[i].z * 0.008;
+
+        nodes[i].vx *= damping;
+        nodes[i].vy *= damping;
+        nodes[i].vz *= damping;
+
+        nodes[i].x += nodes[i].vx;
+        nodes[i].y += nodes[i].vy;
+        nodes[i].z += nodes[i].vz;
+      }
+    }
+
+    function project3D(x, y, z, width, height) {
+      // Rotate around Y
+      const cosY = Math.cos(rotY);
+      const sinY = Math.sin(rotY);
+      const x1 = x * cosY - z * sinY;
+      const z1 = z * cosY + x * sinY;
+
+      // Rotate around X
+      const cosX = Math.cos(rotX);
+      const sinX = Math.sin(rotX);
+      const y2 = y * cosX - z1 * sinX;
+      const z2 = z1 * cosX + y * sinX;
+
+      const fov = 420 * zoom;
+      const viewerDist = 420;
+      const scale = fov / Math.max(80, viewerDist + z2);
+      return {
+        sx: width / 2 + x1 * scale,
+        sy: height / 2 + y2 * scale,
+        z: z2,
+        scale: scale
+      };
+    }
+
+    for (let warm = 0; warm < 60; warm++) {
+      stepNodeLayout();
+    }
+
+    function drawScene() {
+      const w = 680;
+      const h = 390;
+      viewport.setAttribute("viewBox", "0 0 " + w + " " + h);
+      const svgEls = [
+        '<ellipse cx="340" cy="213" rx="235" ry="78" fill="none" stroke="rgba(148, 163, 184, 0.16)" stroke-dasharray="4 4" stroke-width="1" />',
+        '<ellipse cx="340" cy="213" rx="145" ry="48" fill="none" stroke="rgba(148, 163, 184, 0.12)" stroke-dasharray="3 3" stroke-width="1" />'
+      ];
+
+      if (autoRotate && !isDragging) {
+        rotY += 0.0045;
+      }
+
+      if (viewMode === "network") {
+        stepNodeLayout();
+        const mat = MSA.identity_matrices.coverage || MSA.identity_matrices.global;
+
+        // Project all nodes
+        nodes.forEach(function(nd) {
+          const p = project3D(nd.x, nd.y, nd.z, w, h);
+          nd.screenX = p.sx;
+          nd.screenY = p.sy;
+          nd.depth = p.z;
+          nd.screenR = Math.max(8, Math.round(13 * p.scale));
+        });
+
+        // Draw homology edges above threshold
+        for (let i = 0; i < n; i++) {
+          for (let j = i + 1; j < n; j++) {
+            const ident = (mat[i] && mat[i][j]) ? mat[i][j] : 0;
+            if (ident < edgeThreshold) continue;
+            const alpha = Math.min(0.88, Math.max(0.22, ident / 100.0));
+            const strokeColor = ident >= 35 ? ("rgba(16, 185, 129, " + alpha.toFixed(2) + ")") : ("rgba(56, 189, 248, " + alpha.toFixed(2) + ")");
+            const strokeW = Math.max(1.2, (ident / 22.0)).toFixed(1);
+            svgEls.push(
+              '<line x1="' + nodes[i].screenX.toFixed(1) + '" y1="' + nodes[i].screenY.toFixed(1) +
+              '" x2="' + nodes[j].screenX.toFixed(1) + '" y2="' + nodes[j].screenY.toFixed(1) +
+              '" stroke="' + strokeColor + '" stroke-width="' + strokeW + '" />'
+            );
+
+            // Midpoint identity label
+            const mx = (nodes[i].screenX + nodes[j].screenX) / 2;
+            const my = (nodes[i].screenY + nodes[j].screenY) / 2;
+            svgEls.push(
+              '<text x="' + (mx + 4).toFixed(1) + '" y="' + (my - 3).toFixed(1) +
+              '" fill="rgba(203, 213, 225, 0.82)" font-size="10" font-family="monospace">' +
+              ident.toFixed(1) + '%</text>'
+            );
+          }
+        }
+
+        // Sort nodes back-to-front
+        const sortedNodes = nodes.slice().sort(function(a, b) { return b.depth - a.depth; });
+        sortedNodes.forEach(function(nd) {
+          const isSelected = (activeHighlightSeqId === nd.id);
+          const strokeColor = isSelected ? "#FBBF24" : "#FFFFFF";
+          const strokeW = isSelected ? "3.5" : "1.5";
+          const fontW = isSelected ? "bold" : "normal";
+          svgEls.push(
+            '<circle cx="' + nd.screenX.toFixed(1) + '" cy="' + nd.screenY.toFixed(1) +
+            '" r="' + nd.screenR + '" fill="' + nd.color + '" stroke="' + strokeColor +
+            '" stroke-width="' + strokeW + '" />'
+          );
+          svgEls.push(
+            '<text x="' + (nd.screenX + nd.screenR + 6).toFixed(1) + '" y="' + (nd.screenY + 4).toFixed(1) +
+            '" fill="#F8FAFC" font-size="12" font-weight="' + fontW + '" font-family="monospace">' +
+            escapeHtml(nd.label) + ' (' + nd.length + 'aa)</text>'
+          );
+        });
+      } else {
+        // 3D Conservation Landscape ribbon across aligned columns and sequences
+        const cols = MSA.columns || [];
+        const step = Math.max(1, Math.floor(cols.length / 55));
+        for (let sIdx = 0; sIdx < n; sIdx++) {
+          const zOffset = (sIdx - (n - 1) / 2) * 38;
+          const pts = [];
+          for (let cIdx = 0; cIdx < cols.length; cIdx += step) {
+            const col = cols[cIdx];
+            const xCoord = ((cIdx / Math.max(1, cols.length - 1)) - 0.5) * 320;
+            const yCoord = (0.5 - col.conservation_score) * 140;
+            const pt = project3D(xCoord, yCoord, zOffset, w, h);
+            pts.push(pt.sx.toFixed(1) + "," + pt.sy.toFixed(1));
+          }
+          const strokeW = (activeHighlightSeqId === seqs[sIdx].id) ? "3.5" : "2.0";
+          svgEls.push(
+            '<polyline fill="none" stroke="' + nodeColors[sIdx % nodeColors.length] +
+            '" stroke-width="' + strokeW + '" points="' + pts.join(" ") + '" />'
+          );
+        }
+      }
+
+      viewport.innerHTML = svgEls.join("");
+      requestAnimationFrame(drawScene);
+    }
+
+    viewport.addEventListener("mousedown", function(e) {
+      isDragging = true;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+    });
+
+    window.addEventListener("mousemove", function(e) {
+      if (!isDragging) return;
+      const dx = e.clientX - lastMouseX;
+      const dy = e.clientY - lastMouseY;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      rotY += dx * 0.008;
+      rotX += dy * 0.008;
+    });
+
+    window.addEventListener("mouseup", function() {
+      isDragging = false;
+    });
+
+    viewport.addEventListener("click", function(e) {
+      if (viewMode !== "network") return;
+      const rect = viewport.getBoundingClientRect();
+      const scaleX = 680 / Math.max(1, rect.width || 680);
+      const scaleY = 390 / Math.max(1, rect.height || 390);
+      const mx = (e.clientX - rect.left) * scaleX;
+      const my = (e.clientY - rect.top) * scaleY;
+      for (let i = 0; i < nodes.length; i++) {
+        const dx = mx - nodes[i].screenX;
+        const dy = my - nodes[i].screenY;
+        if (Math.sqrt(dx * dx + dy * dy) <= nodes[i].screenR + 8) {
+          toggleSequenceHighlight(nodes[i].id);
+          break;
+        }
+      }
+    });
+
+    viewport.addEventListener("wheel", function(e) {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.08 : 0.92;
+      zoom = Math.max(0.55, Math.min(2.2, zoom * factor));
+    }, { passive: false });
+
+    if (modeSelect) {
+      modeSelect.addEventListener("change", function(e) {
+        viewMode = e.target.value;
+      });
+    }
+    if (threshSlider) {
+      threshSlider.addEventListener("input", function(e) {
+        edgeThreshold = parseInt(e.target.value, 10);
+        if (threshLabel) threshLabel.textContent = edgeThreshold + "%";
+      });
+    }
+    if (autoRotBtn) {
+      autoRotBtn.addEventListener("click", function() {
+        autoRotate = !autoRotate;
+        autoRotBtn.textContent = autoRotate ? "Pause Rotation" : "Auto-Rotate";
+      });
+    }
+    if (resetViewBtn) {
+      resetViewBtn.addEventListener("click", function() {
+        rotX = 0.32;
+        rotY = -0.45;
+        zoom = 1.0;
+      });
+    }
+
+    drawScene();
+  }
+
+  function downloadBlob(filename, content, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // Bind Controls
+  const schemeSelect = document.getElementById("color-scheme-select");
+  if (schemeSelect) {
+    schemeSelect.addEventListener("change", function(e) {
+      activeColorScheme = e.target.value;
+      renderAlignmentTracks();
+    });
+  }
+
+  const consSlider = document.getElementById("consensus-threshold-slider");
+  const consLabel = document.getElementById("consensus-threshold-val");
+  if (consSlider) {
+    consSlider.addEventListener("input", function(e) {
+      const pct = parseInt(e.target.value, 10);
+      consensusThreshold = pct / 100.0;
+      if (consLabel) consLabel.textContent = pct + "%";
+      renderAlignmentTracks();
+    });
+  }
+
+  const fontSlider = document.getElementById("font-size-slider");
+  const fontLabel = document.getElementById("font-size-val");
+  if (fontSlider) {
+    fontSlider.addEventListener("input", function(e) {
+      const px = parseInt(e.target.value, 10);
+      document.documentElement.style.setProperty("--cell-size", px + "px");
+      document.documentElement.style.setProperty("--cell-font", Math.max(10, px - 6) + "px");
+      if (fontLabel) fontLabel.textContent = px + "px";
+    });
+  }
+
+  const jumpInput = document.getElementById("jump-position-input");
+  if (jumpInput) {
+    jumpInput.addEventListener("change", function(e) {
+      const pos = parseInt(e.target.value, 10);
+      if (!isNaN(pos) && pos >= 1 && pos <= MSA.columns.length) {
+        inspectColumn(pos - 1, true);
+      }
+    });
+  }
+
+  const motifInput = document.getElementById("motif-search-input");
+  const motifBanner = document.getElementById("motif-match-banner");
+  if (motifInput) {
+    motifInput.addEventListener("input", function(e) {
+      const pat = e.target.value.trim();
+      motifMatchedCols.clear();
+      if (!pat) {
+        if (motifBanner) motifBanner.classList.add("hidden");
+        renderAlignmentTracks();
+        return;
+      }
+      try {
+        const regex = new RegExp(pat, "gi");
+        let totalMatches = 0;
+        MSA.sequences.forEach(function(seqObj) {
+          let m;
+          while ((m = regex.exec(seqObj.aligned_sequence)) !== null) {
+            totalMatches++;
+            for (let k = m.index; k < m.index + m[0].length; k++) {
+              motifMatchedCols.add(k);
+            }
+            if (m.index === regex.lastIndex) regex.lastIndex++;
+          }
+        });
+        if (motifBanner) {
+          motifBanner.classList.remove("hidden");
+          motifBanner.textContent = "Motif pattern '" + pat + "' matched " + totalMatches + " site(s) across " + motifMatchedCols.size + " aligned column(s).";
+        }
+      } catch (err) {
+        if (motifBanner) {
+          motifBanner.classList.remove("hidden");
+          motifBanner.textContent = "Invalid regular expression: " + err.message;
+        }
+      }
+      renderAlignmentTracks();
+    });
+  }
+
+  const clearBtn = document.getElementById("clear-highlights-btn");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", function() {
+      activeHighlightCol = null;
+      activeHighlightSeqId = null;
+      motifMatchedCols.clear();
+      if (motifInput) motifInput.value = "";
+      if (jumpInput) jumpInput.value = "";
+      if (motifBanner) motifBanner.classList.add("hidden");
+      renderInputProfiles();
+      renderAlignmentTracks();
+      updateSelectedNodePanel(null);
+    });
+  }
+
+  const pimSelect = document.getElementById("pim-metric-select");
+  if (pimSelect) {
+    pimSelect.addEventListener("change", function(e) {
+      renderPimMatrix(e.target.value);
+    });
+  }
+
+  // Tree leaf click integration
+  document.querySelectorAll(".tree-leaf-node").forEach(function(node) {
+    node.addEventListener("click", function() {
+      const seqId = node.getAttribute("data-seq-id");
+      if (seqId) toggleSequenceHighlight(seqId);
+    });
+  });
+
+  // Coordinate Projector form
+  const projBtn = document.getElementById("project-coord-btn");
+  if (projBtn) {
+    projBtn.addEventListener("click", function() {
+      const refSel = document.getElementById("projector-ref-select");
+      const posInp = document.getElementById("projector-pos-input");
+      const nameInp = document.getElementById("projector-name-input");
+      if (!refSel || !posInp) return;
+
+      const refId = refSel.value;
+      const targetPos = parseInt(posInp.value, 10);
+      const featName = (nameInp && nameInp.value.trim()) ? nameInp.value.trim() : ("Site Pos " + targetPos);
+      const seqObj = MSA.sequences.find(function(s) { return s.id === refId; });
+      if (!seqObj || isNaN(targetPos) || targetPos < 1 || targetPos > seqObj.unaligned_length) {
+        alert("Please enter a valid 1-based unaligned residue position between 1 and " + (seqObj ? seqObj.unaligned_length : 1));
+        return;
+      }
+      let unalignedCnt = 0;
+      let mappedCol = -1;
+      for (let c = 0; c < seqObj.aligned_sequence.length; c++) {
+        const ch = seqObj.aligned_sequence[c];
+        if (ch !== "-" && ch !== ".") {
+          unalignedCnt++;
+          if (unalignedCnt === targetPos) {
+            mappedCol = c;
+            break;
+          }
+        }
+      }
+      if (mappedCol >= 0) {
+        const colMeta = MSA.columns[mappedCol];
+        const residues = {};
+        MSA.sequences.forEach(function(s) { residues[s.id] = s.aligned_sequence[mappedCol]; });
+        MSA.features.mapped_features.push({
+          name: featName,
+          type: "user_projected",
+          unaligned_position: targetPos,
+          alignment_column_index: mappedCol,
+          alignment_column_position: mappedCol + 1,
+          reference_aa: seqObj.aligned_sequence[mappedCol],
+          column_conservation: colMeta.conservation_score,
+          column_entropy: colMeta.shannon_entropy,
+          is_invariant: colMeta.is_invariant,
+          conservation_state: colMeta.is_invariant ? "invariant" : (colMeta.conservation_score >= 0.65 ? "conserved" : "divergent"),
+          status: "mapped",
+          residues_across_msa: residues
+        });
+        renderFeatureMapper();
+        inspectColumn(mappedCol, true);
+      }
+    });
+  }
+
+  // Icon-only Light / Dark theme toggle
+  const themeBtn = document.getElementById("toggle-theme-btn");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", function() {
+      const current = document.documentElement.getAttribute("data-theme");
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try {
+        if (window.localStorage) window.localStorage.setItem("msa_dashboard_theme", next);
+      } catch (e) {}
+    });
+  }
+
+  const dlFastaBtn = document.getElementById("export-fasta-btn");
+  if (dlFastaBtn) {
+    dlFastaBtn.addEventListener("click", function() {
+      const lines = [];
+      MSA.sequences.forEach(function(s) {
+        lines.push(">" + (s.description || s.id));
+        for (let i = 0; i < s.aligned_sequence.length; i += 60) {
+          lines.push(s.aligned_sequence.slice(i, i + 60));
+        }
+      });
+      downloadBlob("aligned_sequences.fa", lines.join("\n") + "\n", "text/plain;charset=utf-8");
+    });
+  }
+
+  const dlSvgBtn = document.getElementById("export-svg-btn");
+  if (dlSvgBtn) {
+    dlSvgBtn.addEventListener("click", function() {
+      const cellW = 16;
+      const cellH = 22;
+      const labelW = 210;
+      const topM = 70;
+      const totalW = labelW + MSA.columns.length * cellW + 24;
+      const totalH = topM + MSA.sequences.length * cellH + 40;
+      const parts = [
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + totalW + ' ' + totalH + '" width="' + totalW + '" height="' + totalH + '" font-family="monospace" font-size="12">',
+        '<rect width="' + totalW + '" height="' + totalH + '" fill="#FFFFFF"/>'
+      ];
+      MSA.columns.forEach(function(col) {
+        const x = labelW + col.index * cellW;
+        const bh = Math.max(2, Math.round(col.conservation_score * 32));
+        parts.push('<rect x="' + (x + 1) + '" y="' + (42 - bh) + '" width="' + (cellW - 2) + '" height="' + bh + '" fill="' + getConservationColor(col.conservation_score) + '"/>');
+        if (col.position === 1 || col.position % 10 === 0) {
+          parts.push('<text x="' + (x + 2) + '" y="60" font-size="10" fill="#475569">' + col.position + '</text>');
+        }
+      });
+      MSA.sequences.forEach(function(s, rIdx) {
+        const y = topM + rIdx * cellH;
+        parts.push('<text x="10" y="' + (y + 15) + '" fill="#0F172A" font-weight="600">' + s.id + '</text>');
+        for (let c = 0; c < s.aligned_sequence.length; c++) {
+          const aa = s.aligned_sequence[c];
+          const x = labelW + c * cellW;
+          if (aa !== "-" && aa !== ".") {
+            parts.push('<rect x="' + x + '" y="' + (y + 1) + '" width="' + (cellW - 1) + '" height="' + (cellH - 2) + '" fill="' + getResidueColor(aa, activeColorScheme) + '" fill-opacity="0.3"/>');
+          }
+          parts.push('<text x="' + (x + 8) + '" y="' + (y + 15) + '" text-anchor="middle" fill="#0F172A">' + aa + '</text>');
+        }
+      });
+      parts.push("</svg>");
+      downloadBlob("alignment_visualization.svg", parts.join("\n"), "image/svg+xml;charset=utf-8");
+    });
+  }
+
+  const dlCsvBtn = document.getElementById("export-pim-csv-btn");
+  if (dlCsvBtn) {
+    dlCsvBtn.addEventListener("click", function() {
+      const metric = pimSelect ? pimSelect.value : "global";
+      const ids = MSA.identity_matrices.sequence_ids;
+      let mat = MSA.identity_matrices.global;
+      if (metric === "coverage") mat = MSA.identity_matrices.coverage;
+      else if (metric === "overlap") mat = MSA.identity_matrices.overlap;
+      const rows = [["Sequence_ID"].concat(ids).join(",")];
+      for (let i = 0; i < ids.length; i++) {
+        rows.push([ids[i]].concat(mat[i].map(function(v) { return v.toFixed(2); })).join(","));
+      }
+      downloadBlob("pairwise_identity_" + metric + ".csv", rows.join("\n") + "\n", "text/csv;charset=utf-8");
+    });
+  }
+
+  const dlJsonBtn = document.getElementById("export-pim-json-btn");
+  if (dlJsonBtn) {
+    dlJsonBtn.addEventListener("click", function() {
+      downloadBlob("msa_metrics.json", JSON.stringify(MSA, null, 2), "application/json;charset=utf-8");
+    });
+  }
+
+  const newickPre = document.getElementById("newick-raw-pre");
+  if (newickPre && MSA.phylotree) {
+    newickPre.textContent = MSA.phylotree.newick || "";
+  }
+
+  // Initial render
+  renderInputProfiles();
+  renderAlignmentTracks();
+  renderPimMatrix("global");
+  renderFeatureMapper();
+  init3DHomologyExplorer();
+})();
+  </script>
+</body>
+</html>

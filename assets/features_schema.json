@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionalFeaturesInput",
+  "description": "Schema for functional residue feature coordinate mapping input (--features)",
+  "type": "object",
+  "required": [
+    "reference_id",
+    "features"
+  ],
+  "properties": {
+    "reference_id": {
+      "type": "string",
+      "description": "Sequence identifier or accession substring of the reference sequence in the FASTA file"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "position"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable name of the functional residue or motif site"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "1-based unaligned residue coordinate on the reference sequence"
+          },
+          "type": {
+            "type": "string",
+            "default": "functional_site",
+            "description": "Category such as active_site, binding_site, ptm_site, or motif"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional biochemical context note"
+          }
+        }
+      }
+    }
+  }
+}

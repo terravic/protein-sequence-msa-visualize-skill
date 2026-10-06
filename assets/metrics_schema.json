@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MSAMetricsOutput",
+  "description": "Quantitative multiple sequence alignment metrics produced by scripts/analyze_msa.py",
+  "type": "object",
+  "required": [
+    "summary",
+    "sequences",
+    "columns",
+    "identity_matrices",
+    "features"
+  ],
+  "properties": {
+    "summary": {
+      "type": "object",
+      "required": [
+        "num_sequences",
+        "alignment_length",
+        "invariant_columns",
+        "conservation_index",
+        "mean_conservation_score",
+        "mean_gap_rate",
+        "mean_global_identity",
+        "mean_coverage_identity",
+        "mean_overlap_identity",
+        "consensus_sequence"
+      ],
+      "properties": {
+        "num_sequences": { "type": "integer", "minimum": 2, "maximum": 4000 },
+        "alignment_length": { "type": "integer", "minimum": 1 },
+        "invariant_columns": { "type": "integer", "minimum": 0 },
+        "conservation_index": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+        "mean_conservation_score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "mean_gap_rate": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "mean_global_identity": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+        "mean_coverage_identity": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+        "mean_overlap_identity": { "type": "number", "minimum": 0.0, "maximum": 100.0 },
+        "consensus_sequence": { "type": "string" }
+      }
+    },
+    "sequences": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "description",
+          "aligned_sequence",
+          "unaligned_length",
+          "aligned_length",
+          "gap_count"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "aligned_sequence": { "type": "string" },
+          "unaligned_length": { "type": "integer", "minimum": 1 },
+          "aligned_length": { "type": "integer", "minimum": 1 },
+          "gap_count": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "columns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "index",
+          "position",
+          "shannon_entropy",
+          "conservation_score",
+          "raw_conservation_score",
+          "gap_rate",
+          "consensus_aa",
+          "modal_aa",
+          "modal_frequency",
+          "nongap_modal_frequency",
+          "is_invariant",
+          "aa_counts"
+        ]
+      }
+    },
+    "identity_matrices": {
+      "type": "object",
+      "required": [
+        "sequence_ids",
+        "global",
+        "coverage",
+        "overlap",
+        "pairwise_details"
+      ]
+    },
+    "features": {
+      "type": "object",
+      "required": [
+        "reference_id",
+        "resolved_reference_id",
+        "mapped_features"
+      ]
+    }
+  }
+}
